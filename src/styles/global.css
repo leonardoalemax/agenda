@@ -1,0 +1,351 @@
+/* ============================================================
+   Minha Agenda — Design system "Apple" (ver docs/diretrizes + design.md)
+   Foto-first, superfícies claras/escuras, um único azul de ação (#0066cc),
+   SF Pro via fontes de sistema, tracking negativo em headlines, chrome mínimo,
+   um único product-shadow. Otimizado para iPad 10 e iPhone (iOS).
+   ============================================================ */
+
+:root {
+  /* Fonte: system-ui resolve para SF Pro no iOS/macOS */
+  --font: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Ação — o único acento interativo */
+  --accent: #0066cc;
+  --accent-focus: #0071e3;
+  --link: #0066cc;
+
+  /* Superfícies (modo claro, o canônico do design) */
+  --bg: #f5f5f7;          /* parchment: canvas da página */
+  --surface: #ffffff;     /* cartões / tiles claros */
+  --surface-2: #fafafc;   /* insets / inputs (pearl) */
+  --tile-dark: #272729;   /* tile escuro de destaque */
+
+  /* Texto */
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #86868b;
+  --on-accent: #ffffff;
+  --on-dark: #ffffff;
+
+  /* Linhas */
+  --hairline: #d2d2d7;
+  --divider-soft: #f0f0f0;
+
+  /* Raios */
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: 18px;
+  --r-pill: 9999px;
+
+  /* Espaçamento (base 8) */
+  --s-xs: 8px;
+  --s-sm: 12px;
+  --s-md: 17px;
+  --s-lg: 24px;
+  --s-xl: 32px;
+  --s-xxl: 48px;
+
+  /* O único shadow do sistema: sob imagens de produto.
+     Sintaxe de drop-shadow (offset-x offset-y blur cor) — sem spread. */
+  --product-shadow: 3px 5px 22px rgba(0, 0, 0, 0.20);
+
+  --maxw: 1040px;
+  --header-h: 52px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --link: #2997ff;
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2a2a2c;
+    --tile-dark: #1c1c1e;
+    --ink: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #8e8e93;
+    --hairline: #38383a;
+    --divider-soft: #2a2a2c;
+    --product-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-wrap: break-word;
+  /* respiro pra home indicator */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-left: max(var(--s-lg), env(safe-area-inset-left));
+  padding-right: max(var(--s-lg), env(safe-area-inset-right));
+  padding-top: var(--s-lg);
+  padding-bottom: var(--s-lg);
+}
+
+/* ===== Header (sub-nav frosted) ===== */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--hairline);
+  padding-top: env(safe-area-inset-top);
+}
+.topbar .wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  min-height: var(--header-h);
+  padding-top: var(--s-sm);
+  padding-bottom: var(--s-sm);
+}
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); }
+.brand:hover { text-decoration: none; }
+.brand-name { font-size: 21px; font-weight: 600; letter-spacing: 0.231px; }
+.brand .dot {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 100px var(--accent);
+}
+.spacer { flex: 1; }
+
+/* ===== Tipografia utilitária ===== */
+.hero-title {
+  font-size: clamp(34px, 8vw, 56px);
+  font-weight: 600;
+  line-height: 1.07;
+  letter-spacing: -0.02em;
+  margin: var(--s-lg) 0 var(--s-xs);
+}
+.section-title {
+  margin: var(--s-xl) 0 var(--s-sm);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lead { font-size: 21px; font-weight: 400; color: var(--muted); margin: 0 0 var(--s-lg); }
+.hint { font-size: 14px; letter-spacing: -0.224px; color: var(--muted); }
+.offline-ready { color: var(--muted); }
+.back {
+  display: inline-block;
+  color: var(--link);
+  font-size: 17px;
+  margin-bottom: var(--s-md);
+}
+
+/* ===== Badges (chips neutros — sem competir com o azul) ===== */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em;
+  padding: 4px 10px; border-radius: var(--r-pill);
+  color: var(--muted); background: var(--surface-2);
+  border: 1px solid var(--hairline);
+}
+.badge.diario, .badge.checklist, .badge.custom, .badge.gunpla { color: var(--muted); }
+
+/* ===== Botões ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; font-family: var(--font);
+  font-size: 17px; font-weight: 400; letter-spacing: -0.374px;
+  color: var(--link); background: transparent;
+  border: 1px solid var(--accent); border-radius: var(--r-pill);
+  padding: 10px 22px; min-height: 44px;
+  transition: transform .12s ease;
+}
+.btn:hover { text-decoration: none; }
+.btn:active { transform: scale(0.96); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+.row { display: flex; gap: var(--s-sm); flex-wrap: wrap; align-items: center; }
+
+/* ===== Cartões utilitários (home) ===== */
+.grid { display: grid; gap: var(--s-md); }
+.card {
+  display: block; padding: var(--s-lg);
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--hairline); border-radius: var(--r-lg);
+  transition: border-color .15s ease, transform .1s ease;
+}
+.card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); text-decoration: none; }
+.card:active { transform: scale(0.995); }
+.card h3 { margin: 8px 0 4px; font-size: 17px; font-weight: 600; letter-spacing: -0.374px; }
+.card .meta { color: var(--muted); font-size: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.card p { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.43; }
+.card .arrow { color: var(--link); font-size: 14px; margin-top: 10px; display: inline-block; }
+
+/* ===== Áreas (home) ===== */
+.areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--s-md); margin-bottom: var(--s-xs); }
+.area-card {
+  display: flex; align-items: center; gap: var(--s-sm); padding: var(--s-lg);
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-lg); color: var(--ink);
+  transition: border-color .15s ease, transform .1s ease;
+}
+.area-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); text-decoration: none; }
+.area-card:active { transform: scale(0.99); }
+.area-card .emoji { font-size: 28px; line-height: 1; }
+.area-card .a-title { font-size: 17px; font-weight: 600; }
+.area-card small { display: block; color: var(--muted); font-size: 14px; }
+
+/* ===== Documento (markdown renderizado) ===== */
+.doc-header { margin: 0 0 var(--s-lg); }
+.doc-header h1 { margin: 10px 0 8px; font-size: clamp(34px, 6vw, 40px); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+.doc-header .meta { color: var(--muted); font-size: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font-size: 12px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--hairline); padding: 3px 10px; border-radius: var(--r-pill); }
+
+.content { font-size: 17px; line-height: 1.47; }
+.content :is(h2, h3) { letter-spacing: -0.02em; margin-top: var(--s-xl); font-weight: 600; }
+.content h2 { font-size: 28px; }
+.content h3 { font-size: 21px; }
+.content a { text-decoration: underline; }
+.content pre { background: var(--surface); border: 1px solid var(--hairline); padding: var(--s-md); border-radius: var(--r-md); overflow-x: auto; }
+.content code { font-size: 0.9em; }
+.content blockquote { margin: var(--s-md) 0; padding: 4px 0 4px var(--s-md); border-left: 3px solid var(--accent); color: var(--muted); }
+.content img { max-width: 100%; border-radius: var(--r-md); }
+.content hr { border: none; border-top: 1px solid var(--hairline); margin: var(--s-lg) 0; }
+
+/* ===== Checklists interativas ===== */
+.content ul.contains-task-list { list-style: none; padding-left: 0; }
+ul.contains-task-list li { display: flex; align-items: flex-start; gap: var(--s-sm); padding: 8px 0; }
+ul.contains-task-list li input[type='checkbox'] {
+  width: 24px; height: 24px; margin-top: 2px; accent-color: var(--accent);
+  cursor: pointer; flex-shrink: 0;
+}
+ul.contains-task-list li.done { color: var(--muted); }
+ul.contains-task-list li.done > * { text-decoration: line-through; }
+
+/* Barra de progresso (fill sólido, sem gradiente) */
+.progress { margin: var(--s-md) 0 var(--s-lg); }
+.progress .track { height: 8px; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--r-pill); overflow: hidden; }
+.progress .track > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+.progress .label { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+/* ===== Diário ===== */
+.diary-date { font-size: clamp(48px, 12vw, 72px); font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
+.diary-date small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 10px; }
+
+/* ===== Footer ===== */
+footer.foot { color: var(--muted); font-size: 12px; margin-top: var(--s-xxl); border-top: 1px solid var(--hairline); }
+footer.foot .wrap { text-align: center; padding-top: var(--s-xl); padding-bottom: max(var(--s-xl), env(safe-area-inset-bottom)); }
+
+/* ============================================================
+   Hobbies: Gunpla
+   ============================================================ */
+
+/* grade: chip neutro com pontinho de cor (dado, não acento de marca) */
+.badge.grade { gap: 6px; }
+.badge.grade::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.badge.grade-hg::before { background: #2f8fed; }
+.badge.grade-rg::before { background: #e0435b; }
+.badge.grade-eg::before { background: #16a34a; }
+.badge.grade-mg::before { background: #a855f7; }
+
+/* Totais */
+.totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
+.total-box {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-lg);
+  padding: var(--s-md); display: flex; flex-direction: column; gap: 4px;
+}
+.total-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.total-box strong { font-size: 17px; font-weight: 600; letter-spacing: -0.374px; }
+
+/* Grid de kits (store-utility-card) */
+.kit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--s-md); }
+.kit {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-lg);
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: border-color .15s ease;
+}
+.kit:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); }
+.kit-thumb { position: relative; display: block; aspect-ratio: 1 / 1; background: #ffffff; padding: var(--s-md); }
+.kit-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(var(--product-shadow)); }
+.kit-thumb .badge.grade { position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.9); color: var(--ink); border-color: transparent; }
+.kit-body { padding: var(--s-md); display: flex; flex-direction: column; gap: var(--s-sm); flex: 1; }
+.kit-name { font-weight: 600; font-size: 17px; line-height: 1.24; letter-spacing: -0.374px; color: var(--ink); }
+.kit-name:hover { color: var(--link); text-decoration: none; }
+.kit-code { display: block; font-size: 12px; color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+.kit-price { display: flex; align-items: baseline; gap: 10px; margin-top: auto; flex-wrap: wrap; }
+.kit-price .yen { font-weight: 600; font-size: 21px; letter-spacing: -0.01em; }
+.kit-price .brl { color: var(--muted); font-size: 14px; font-weight: 400; }
+.kit-price.big .yen { font-size: 34px; }
+.kit-price.big .brl { font-size: 17px; }
+
+.bought-toggle {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  font-size: 14px; color: var(--muted); user-select: none;
+  padding-top: var(--s-sm); border-top: 1px solid var(--hairline); min-height: 30px;
+}
+.bought-toggle input { width: 22px; height: 22px; accent-color: var(--accent); cursor: pointer; }
+
+/* preço pago + diferença */
+.paid-row { display: none; flex-direction: column; gap: 8px; }
+.kit.bought .paid-row { display: flex; }
+.paid-input { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.paid-input input {
+  width: 7rem; padding: 8px 12px; font-size: 17px; font-weight: 600; font-family: var(--font);
+  color: var(--ink); background: var(--surface-2);
+  border: 1px solid var(--hairline); border-radius: var(--r-sm); min-height: 40px;
+}
+.paid-input input:focus { outline: none; border-color: var(--accent); }
+.paid-diff { font-size: 14px; font-weight: 600; min-height: 1em; }
+.paid-diff.below, .total-strong.below { color: #1a7f37; }
+.paid-diff.above, .total-strong.above { color: #d11f2f; }
+.paid-diff.on-target, .total-strong.on-target { color: var(--muted); }
+.total-strong { font-size: 17px; }
+@media (prefers-color-scheme: dark) {
+  .paid-diff.below, .total-strong.below { color: #4ac26b; }
+  .paid-diff.above, .total-strong.above { color: #ff6b6b; }
+}
+
+/* Kit comprado: confirma com o azul, esmaece a imagem */
+.kit.bought { border-color: var(--accent); }
+.kit.bought .kit-thumb img, .kit.bought .kit-name { opacity: .55; }
+.kit.bought .kit-thumb::after {
+  content: '✓ comprado'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--accent) 82%, transparent);
+  color: #fff; font-weight: 600; font-size: 17px; letter-spacing: -0.374px;
+}
+.kit.bought .bought-toggle { color: var(--accent); font-weight: 600; }
+
+/* Hero da página individual do kit */
+.kit-hero { display: flex; gap: var(--s-lg); flex-wrap: wrap; align-items: flex-start; margin: 0 0 var(--s-lg); }
+.kit-hero .hero-img {
+  width: 280px; max-width: 100%; aspect-ratio: 1/1; padding: var(--s-lg);
+  background: #ffffff; border-radius: var(--r-lg); border: 1px solid var(--hairline);
+  display: flex; align-items: center; justify-content: center;
+}
+.kit-hero .hero-img img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(var(--product-shadow)); }
+.kit-hero .hero-meta { flex: 1; min-width: 240px; }
+.kit-hero h1 { margin: 12px 0; font-size: clamp(28px, 5vw, 40px); font-weight: 600; letter-spacing: -0.02em; }
+
+/* ===== Tablet/desktop: mais respiro ===== */
+@media (min-width: 736px) {
+  .wrap { padding-top: var(--s-xl); padding-bottom: var(--s-xl); }
+}

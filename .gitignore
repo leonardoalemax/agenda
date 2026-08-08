@@ -1,0 +1,14 @@
+# deps
+node_modules/
+
+# build
+dist/
+.astro/
+
+# pwa gerado
+public/icons/*.png
+dev-dist/
+
+# sistema
+.DS_Store
+*.log

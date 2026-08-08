@@ -1,0 +1,70 @@
+---
+import '../styles/global.css';
+import { withBase } from '../lib/base';
+import { pwaInfo } from 'virtual:pwa-info';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offline.' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+
+    <!-- PWA / iOS (iPad 10 + iPhone) -->
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Agenda" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="apple-touch-icon" href={withBase('icons/apple-touch-icon.png')} />
+    <title>{title}</title>
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap">
+        <a class="brand" href={withBase('')}>
+          <span class="dot"></span>
+          <span class="brand-name">Agenda</span>
+        </a>
+        <span class="spacer"></span>
+        <span id="pwa-status" class="hint"></span>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        Feito com Markdown · funciona offline · seus dados ficam no dispositivo
+      </div>
+    </footer>
+
+    <script>
+      import { registerSW } from 'virtual:pwa-register';
+      const status = document.getElementById('pwa-status');
+      registerSW({
+        immediate: true,
+        onOfflineReady() {
+          if (status) {
+            status.textContent = 'Offline pronto';
+            status.className = 'hint offline-ready';
+          }
+        },
+      });
+    </script>
+  </body>
+</html>

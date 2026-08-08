@@ -1,0 +1,30 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { withBase } from '../lib/base';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { entry: CollectionEntry<'agenda'> }
+const { entry } = Astro.props;
+const { title, date, tags, summary } = entry.data;
+const dateStr = date
+  ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeZone: 'UTC' }).format(date)
+  : null;
+---
+
+<BaseLayout title={title} description={summary}>
+  <a class="back" href={withBase('')}>← agenda</a>
+  <header class="doc-header">
+    <span class="badge custom">custom</span>
+    <h1>{title}</h1>
+    <div class="meta">
+      {dateStr && <span>{dateStr}</span>}
+      {tags.length > 0 && (
+        <span class="tags">{tags.map((t) => <span class="tag">#{t}</span>)}</span>
+      )}
+    </div>
+  </header>
+
+  <article class="content">
+    <slot />
+  </article>
+</BaseLayout>

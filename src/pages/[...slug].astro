@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content';
+import DiaryLayout from '../layouts/DiaryLayout.astro';
+import ChecklistLayout from '../layouts/ChecklistLayout.astro';
+import CustomLayout from '../layouts/CustomLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('agenda');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const layouts = {
+  diario: DiaryLayout,
+  checklist: ChecklistLayout,
+  custom: CustomLayout,
+} as const;
+
+const Layout = layouts[entry.data.type] ?? CustomLayout;
+---
+
+<Layout entry={entry}>
+  <Content />
+</Layout>

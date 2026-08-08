@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Backup from '../components/Backup.astro';
+import { withBase } from '../lib/base';
+
+const entries = await getCollection('agenda');
+
+// ordena por data (mais recente primeiro); sem data vai pro fim
+const sorted = entries.sort((a, b) => {
+  const da = a.data.date?.getTime() ?? -Infinity;
+  const dbt = b.data.date?.getTime() ?? -Infinity;
+  return dbt - da;
+});
+
+const labels: Record<string, string> = {
+  diario: 'Diários',
+  checklist: 'Checklists',
+  custom: 'Custom',
+};
+const order = ['diario', 'checklist', 'custom'];
+const groups = order
+  .map((type) => ({ type, items: sorted.filter((e) => e.data.type === type) }))
+  .filter((g) => g.items.length > 0);
+
+const fmt = (d?: Date) =>
+  d ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: 'UTC' }).format(d) : '';
+---
+
+<BaseLayout>
+  <h1 class="hero-title">Sua agenda</h1>
+  <p class="lead">
+    {entries.length} {entries.length === 1 ? 'página' : 'páginas'} · escreva Markdown em <code>src/content/</code> e dê push.
+  </p>
+
+  <Backup />
+
+  <h2 class="section-title">Áreas</h2>
+  <div class="areas">
+    <a class="area-card" href={withBase('hobbies/gunpla')}>
+      <span class="emoji">🤖</span>
+      <span>
+        <span class="a-title">Gunpla</span>
+        <small>Wishlist de kits</small>
+      </span>
+    </a>
+  </div>
+
+  {groups.map((g) => (
+    <section>
+      <h2 class="section-title">{labels[g.type]}</h2>
+      <div class="grid">
+        {g.items.map((e) => (
+          <a class="card" href={withBase(e.id)}>
+            <span class={`badge ${e.data.type}`}>{e.data.type}</span>
+            <h3>{e.data.title}</h3>
+            <div class="meta">
+              {e.data.date && <span>{fmt(e.data.date)}</span>}
+              {e.data.tags.length > 0 && (
+                <span class="tags">{e.data.tags.map((t) => <span class="tag">#{t}</span>)}</span>
+              )}
+            </div>
+            {e.data.summary && <p>{e.data.summary}</p>}
+            <span class="arrow">Abrir ›</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  {entries.length === 0 && (
+    <p class="hint">Nenhuma página ainda. Crie um arquivo <code>.md</code> em <code>src/content/</code>.</p>
+  )}
+</BaseLayout>

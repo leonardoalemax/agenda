@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/base';
+import { formatYen, formatBRL, yenToBRL, shortName } from '../../../lib/gunpla';
+
+const all = await getCollection('gunpla');
+const wishlist = all
+  .filter((k) => k.data.tags.includes('wishlist'))
+  .sort((a, b) => a.data.priceYen - b.data.priceYen);
+
+const totalYen = wishlist.reduce((s, k) => s + k.data.priceYen, 0);
+---
+
+<BaseLayout title="Gunpla · Wishlist" description="Kits de Gunpla na wishlist, com preço em ienes e reais.">
+  <a class="back" href={withBase('')}>← agenda</a>
+
+  <header class="doc-header">
+    <span class="badge gunpla">gunpla · wishlist</span>
+    <h1>Wishlist de Gunpla</h1>
+    <p class="hint" style="margin:.2rem 0 0;">
+      {wishlist.length} kits · cotação fixa 1000¥ = R$ 35 · marque os que já comprou (salva no dispositivo)
+    </p>
+  </header>
+
+  <section class="totals">
+    <div class="total-box">
+      <span class="total-label">comprados</span>
+      <strong data-total-count>0/{wishlist.length} comprados</strong>
+    </div>
+    <div class="total-box">
+      <span class="total-label">projeção (comprados)</span>
+      <strong data-total-proj>—</strong>
+    </div>
+    <div class="total-box">
+      <span class="total-label">pago (real)</span>
+      <strong data-total-paid>—</strong>
+    </div>
+    <div class="total-box">
+      <span class="total-label">diferença vs projeção</span>
+      <strong class="total-strong" data-total-diff>—</strong>
+    </div>
+    <div class="total-box">
+      <span class="total-label">falta comprar</span>
+      <strong data-total-remaining>—</strong>
+    </div>
+    <div class="total-box">
+      <span class="total-label">total da lista</span>
+      <strong data-total-all>{formatBRL(yenToBRL(totalYen))}</strong>
+    </div>
+  </section>
+
+  <div class="kit-grid" data-wishlist>
+    {wishlist.map((k) => (
+      <article class="kit" data-kit data-yen={k.data.priceYen}>
+        <a class="kit-thumb" href={withBase(`hobbies/gunpla/${k.id}`)}>
+          <img src={withBase(k.data.image)} alt={k.data.name} loading="lazy" />
+          <span class={`badge grade grade-${(k.data.grade || '').toLowerCase()}`}>{k.data.grade}</span>
+        </a>
+        <div class="kit-body">
+          <a class="kit-name" href={withBase(`hobbies/gunpla/${k.id}`)}>
+            <span class="kit-code">{k.data.grade} · {k.data.scale}</span>
+            {shortName(k.data.name)}
+          </a>
+          <div class="kit-price">
+            <span class="yen">{formatYen(k.data.priceYen)}</span>
+            <span class="brl">{formatBRL(yenToBRL(k.data.priceYen))}</span>
+          </div>
+          <label class="bought-toggle">
+            <input type="checkbox" data-bought={k.id} />
+            <span>Comprado</span>
+          </label>
+          <div class="paid-row">
+            <label class="paid-input">
+              Paguei R$
+              <input type="number" inputmode="decimal" step="0.01" min="0" data-paid={k.id} placeholder="0,00" />
+            </label>
+            <span class="paid-diff" data-paid-diff={k.id}></span>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  {wishlist.length === 0 && (
+    <p class="hint">Nenhum kit com a tag <code>wishlist</code> ainda.</p>
+  )}
+
+  <script>
+    import { initGunplaWishlist } from '../../../lib/gunpla-client';
+    initGunplaWishlist();
+  </script>
+</BaseLayout>

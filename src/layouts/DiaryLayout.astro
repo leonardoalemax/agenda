@@ -1,0 +1,31 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { withBase } from '../lib/base';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { entry: CollectionEntry<'agenda'> }
+const { entry } = Astro.props;
+const { title, date, tags, summary } = entry.data;
+const d = date ?? new Date();
+const day = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', timeZone: 'UTC' }).format(d);
+const monthYear = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+const weekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: 'UTC' }).format(d);
+---
+
+<BaseLayout title={title} description={summary}>
+  <a class="back" href={withBase('')}>← agenda</a>
+  <header class="doc-header">
+    <span class="badge diario">diário</span>
+    <div class="diary-date">
+      {day} <small>{monthYear} · {weekday}</small>
+    </div>
+    <h1>{title}</h1>
+    {tags.length > 0 && (
+      <div class="tags">{tags.map((t) => <span class="tag">#{t}</span>)}</div>
+    )}
+  </header>
+
+  <article class="content">
+    <slot />
+  </article>
+</BaseLayout>

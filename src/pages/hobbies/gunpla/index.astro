@@ -54,7 +54,10 @@ const totalYen = wishlist.reduce((s, k) => s + k.data.priceYen, 0);
     {wishlist.map((k) => (
       <article class="kit" data-kit data-yen={k.data.priceYen}>
         <a class="kit-thumb" href={withBase(`hobbies/gunpla/${k.id}`)}>
-          <img src={withBase(k.data.image)} alt={k.data.name} loading="lazy" />
+          {k.data.image
+            ? <img src={withBase(k.data.image)} alt={k.data.name} loading="lazy" />
+            : <div class="kit-no-img" aria-hidden="true">?</div>
+          }
           <span class={`badge grade grade-${(k.data.grade || '').toLowerCase()}`}>{k.data.grade}</span>
         </a>
         <div class="kit-body">

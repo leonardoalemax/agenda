@@ -29,7 +29,7 @@ const gunpla = defineCollection({
     scale: z.string().default('1/144'),
     code: z.string().optional(), // ex.: GN-001
     priceYen: z.number(),
-    image: z.string(), // caminho local em public/ (ex.: hobbies/gunpla/slug.jpg)
+    image: z.string().optional(), // caminho local em public/ (ex.: hobbies/gunpla/slug.jpg)
     tags: z.array(z.string()).default([]),
     date: z.coerce.date().optional(),
     summary: z.string().optional(),

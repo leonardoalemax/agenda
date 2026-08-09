@@ -283,8 +283,10 @@ footer.foot .wrap { text-align: center; padding-top: var(--s-xl); padding-bottom
   transition: border-color .15s ease;
 }
 .kit:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); }
-.kit-thumb { position: relative; display: block; aspect-ratio: 1 / 1; background: #ffffff; padding: var(--s-md); }
+.kit-thumb { position: relative; display: block; aspect-ratio: 1 / 1; background: #ffffff; }
 .kit-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(var(--product-shadow)); }
+.kit-no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--muted); background: var(--surface-2); border-radius: var(--r-md); }
+.kit-no-img.large { font-size: 5rem; border-radius: var(--r-lg); }
 .kit-thumb .badge.grade { position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.9); color: var(--ink); border-color: transparent; }
 .kit-body { padding: var(--s-md); display: flex; flex-direction: column; gap: var(--s-sm); flex: 1; }
 .kit-name { font-weight: 600; font-size: 17px; line-height: 1.24; letter-spacing: -0.374px; color: var(--ink); }

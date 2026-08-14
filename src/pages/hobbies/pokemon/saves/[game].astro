@@ -57,10 +57,9 @@ const platforms = platformsForGame(genName, game);
 
   <div data-dex-wrap hidden>
     <div class="active-save-info">
-      <label class="moved-home-toggle">
-        <input type="checkbox" data-moved-home />
-        <span>Movido pro HOME</span>
-      </label>
+      <button class="icon-btn moved-home-btn" type="button" data-moved-home title="Movido pro HOME" aria-label="Movido pro HOME">
+        <Icon name="house" size={20} />
+      </button>
       <div class="active-save-actions">
         <button class="icon-btn" type="button" data-rename-active title="Renomear" aria-label="Renomear">✎</button>
         <button class="icon-btn" type="button" data-delete-active title="Apagar" aria-label="Apagar">🗑</button>
@@ -159,11 +158,12 @@ const platforms = platformsForGame(genName, game);
     display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm);
     flex-wrap: wrap; background: var(--surface); padding: var(--s-sm) var(--s-md);
   }
-  .moved-home-toggle {
-    display: flex; align-items: center; gap: 8px; cursor: pointer;
-    font-size: 14px; color: var(--muted); user-select: none;
+  .moved-home-btn {
+    color: var(--muted); transition: color .15s ease;
   }
-  .moved-home-toggle input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; flex: none; }
+  .moved-home-btn[aria-pressed="true"] {
+    color: #f59e0b;
+  }
   .active-save-actions { display: flex; gap: var(--s-sm); }
 
   /* ===== progresso ===== */

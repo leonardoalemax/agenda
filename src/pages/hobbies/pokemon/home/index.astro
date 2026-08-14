@@ -102,14 +102,22 @@ const gameIndex = Object.fromEntries(
     padding: var(--s-sm) 4px; text-align: center; border-radius: var(--r-md);
     background: var(--surface-2);
   }
-  :global(.home-mon img) {
+  :global(.home-mon-sprite-wrapper) {
+    position: relative; display: inline-block;
+  }
+  :global(.home-mon-sprite) {
     width: 56px; height: 56px; object-fit: contain; display: block;
     image-rendering: pixelated;
     opacity: .35; filter: grayscale(1);
   }
+  :global(.home-mon-origin-mark) {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 14px; height: 14px;
+    padding: 1px; box-sizing: border-box;
+  }
   :global(.home-mon-num) { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   :global(.home-mon-name) { font-size: 11px; line-height: 1.2; overflow-wrap: anywhere; }
-  :global(.home-mon.caught img) { opacity: 1; filter: none; }
+  :global(.home-mon.caught .home-mon-sprite) { opacity: 1; filter: none; }
   :global(.home-mon.caught) { background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)); }
   :global(.home-mon.caught .home-mon-name) { font-weight: 600; }
 
@@ -125,7 +133,7 @@ const gameIndex = Object.fromEntries(
       grid-template-columns: repeat(var(--cols), minmax(48px, 1fr));
       gap: 3px;
     }
-    :global(.home-mon img) { width: 48px; height: 48px; }
+    :global(.home-mon-sprite) { width: 48px; height: 48px; }
     :global(.home-mon) { padding: 6px 2px; }
     :global(.home-mon-num),
     :global(.home-mon-name) { display: none; }

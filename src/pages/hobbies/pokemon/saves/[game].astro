@@ -2,7 +2,7 @@
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import Icon from '../../../../components/Icon.astro';
 import { withBase } from '../../../../lib/base';
-import { allGenerations, dexForGame, layoutForGame, boxesFor, gameName, spritePath, coverPath, platformsForGame } from '../../../../lib/pokemon';
+import { allGenerations, dexForGame, layoutForGame, boxesFor, gameName, spritePath, coverPath, platformsForGame, originMarkPath } from '../../../../lib/pokemon';
 
 export async function getStaticPaths() {
   const gens = allGenerations();
@@ -116,21 +116,37 @@ const platforms = platformsForGame(genName, game);
             </h2>
           )}
           <ul class="box-items">
-            {box.map((e) => (
-              <li class="mon" data-mon>
-                <button type="button" class="mon-btn" data-caught={e.species} aria-pressed="false" aria-label={e.name}>
-                  <img
-                    src={withBase(spritePath(e.id))}
-                    alt=""
-                    width="96"
-                    height="96"
-                    loading="lazy"
-                    decoding="async" />
-                  <span class="mon-num">#{String(e.number).padStart(3, '0')}</span>
-                  <span class="mon-name">{e.name}</span>
-                </button>
-              </li>
-            ))}
+            {box.map((e) => {
+              const markPath = originMarkPath(game);
+              return (
+                <li class="mon" data-mon>
+                  <button type="button" class="mon-btn" data-caught={e.species} aria-pressed="false" aria-label={e.name}>
+                    <div class="mon-sprite-wrapper">
+                      <img
+                        class="mon-sprite"
+                        src={withBase(spritePath(e.id))}
+                        alt=""
+                        width="96"
+                        height="96"
+                        loading="lazy"
+                        decoding="async" />
+                      {markPath && (
+                        <img
+                          class="mon-origin-mark"
+                          src={withBase(markPath)}
+                          alt=""
+                          width="24"
+                          height="24"
+                          loading="lazy"
+                          decoding="async" />
+                      )}
+                    </div>
+                    <span class="mon-num">#{String(e.number).padStart(3, '0')}</span>
+                    <span class="mon-name">{e.name}</span>
+                  </button>
+                </li>
+              );
+            })}
             {Array.from({ length: layout.perBox - box.length }).map(() => (
               <li class="mon empty" aria-hidden="true"></li>
             ))}
@@ -254,8 +270,10 @@ const platforms = platformsForGame(genName, game);
   }
   .dex-icon-list .mon + .mon,
   .dex-infinite-list .mon + .mon { border-top: 1px solid var(--hairline); }
-  .dex-icon-list .mon img,
-  .dex-infinite-list .mon img { width: 40px; height: 40px; }
+  .dex-icon-list .mon-sprite,
+  .dex-infinite-list .mon-sprite { width: 40px; height: 40px; }
+  .dex-icon-list .mon-origin-mark,
+  .dex-infinite-list .mon-origin-mark { width: 16px; height: 16px; }
   .dex-icon-list .mon-name,
   .dex-infinite-list .mon-name { flex: 1; font-size: 15px; }
 
@@ -271,7 +289,7 @@ const platforms = platformsForGame(genName, game);
   }
   .mon-btn:hover { background: color-mix(in srgb, var(--accent) 6%, var(--surface-2)); }
   .mon-btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
-  .mon img {
+  .mon-sprite {
     width: 72px; height: 72px; object-fit: contain; display: block;
     image-rendering: pixelated; /* sprites são pixel art: nada de borrar ao escalar */
     opacity: .35; filter: grayscale(1);
@@ -279,8 +297,18 @@ const platforms = platformsForGame(genName, game);
   }
   .mon-num { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
+  /* marca de origem do pokémon */
+  .mon-sprite-wrapper {
+    position: relative; display: inline-block;
+  }
+  .mon-origin-mark {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 20px; height: 20px;
+    padding: 2px; box-sizing: border-box;
+  }
+
   /* pego: sprite ganha cor */
-  .mon.caught img { opacity: 1; filter: none; }
+  .mon.caught .mon-sprite { opacity: 1; filter: none; }
   .mon.caught .mon-btn { background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)); }
   .mon.caught .mon-name { font-weight: 600; }
 
@@ -305,7 +333,7 @@ const platforms = platformsForGame(genName, game);
       grid-template-columns: repeat(var(--cols), minmax(48px, 1fr));
       gap: 3px;
     }
-    .dex-graphic-grid .mon img { width: 48px; height: 48px; }
+    .dex-graphic-grid .mon-sprite { width: 48px; height: 48px; }
     .dex-graphic-grid .mon-btn { padding: 6px 2px; }
     .dex-graphic-grid .mon-num,
     .dex-graphic-grid .mon-name { display: none; }

@@ -190,7 +190,7 @@ a:hover { text-decoration: underline; }
   color: var(--muted); background: var(--surface-2);
   border: 1px solid var(--hairline);
 }
-.badge.diario, .badge.checklist, .badge.custom, .badge.gunpla, .badge.pokemon { color: var(--muted); }
+.badge.diario, .badge.checklist, .badge.custom, .badge.gunpla, .badge.pokemon, .badge.cheevos { color: var(--muted); }
 
 /* ===== Botões ===== */
 .btn {

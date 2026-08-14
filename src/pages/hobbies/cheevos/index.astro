@@ -1,0 +1,197 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '../../../components/Icon.astro';
+import { withBase } from '../../../lib/base';
+import { cheevosIndex, allCheevosGames, gameIconPath, awardLabel } from '../../../lib/cheevos';
+
+const snapshot = cheevosIndex();
+const games = allCheevosGames();
+
+const fmtDate = (iso: string | null) =>
+  iso
+    ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(iso))
+    : '';
+const fmtNum = (n: number) => new Intl.NumberFormat('pt-BR').format(n);
+---
+
+<BaseLayout title="Cheevos" description="Minhas conquistas do RetroAchievements.">
+  <a class="back" href={withBase('')}>← agenda</a>
+
+  <header class="doc-header">
+    <span class="badge cheevos">cheevos</span>
+    <h1>Conquistas</h1>
+    {snapshot ? (
+      <p class="hint" style="margin:.2rem 0 0;">
+        {fmtNum(snapshot.totals.games)} jogos · {fmtNum(snapshot.totals.earned)}/{fmtNum(snapshot.totals.achievements)} conquistas ·
+        {' '}{fmtNum(snapshot.totals.points)} pontos · {fmtNum(snapshot.totals.mastered)} masterizados
+      </p>
+    ) : (
+      <p class="hint" style="margin:.2rem 0 0;">Nenhum sync ainda.</p>
+    )}
+  </header>
+
+  {snapshot ? (
+    <>
+      <p class="hint sync-line">
+        <strong>{snapshot.user}</strong> · sincronizado em {fmtDate(snapshot.syncedAt)}
+      </p>
+
+      <div class="mon-search-wrapper">
+        <Icon name="search" size={18} />
+        <input
+          class="mon-search"
+          type="search"
+          inputmode="search"
+          autocomplete="off"
+          placeholder="Buscar por jogo ou console…"
+          aria-label="Buscar jogo por nome ou console"
+          data-cheevos-search />
+      </div>
+      <p class="hint" data-cheevos-empty hidden>Nenhum jogo encontrado.</p>
+
+      <div class="cheevos-list">
+        {games.map((g) => {
+          const pct = g.total ? Math.round((g.earned / g.total) * 100) : 0;
+          const award = awardLabel(g.award);
+          return (
+            <a
+              class="cheevo-game"
+              href={withBase(`hobbies/cheevos/${g.id}`)}
+              data-cheevo-item
+              data-search={`${g.title} ${g.console}`.toLowerCase()}>
+              <img
+                class="cheevo-game-icon"
+                src={withBase(gameIconPath(g.icon))}
+                alt=""
+                width="64"
+                height="64"
+                loading="lazy"
+                decoding="async" />
+              <div class="cheevo-game-info">
+                <strong>{g.title}</strong>
+                <span class="hint">{g.console}</span>
+                {award && <span class={`award award-${g.award}`}>{award}</span>}
+              </div>
+              <div class="cheevo-game-progress">
+                <div class="progress"><span style={`width:${pct}%`}></span></div>
+                <span class="hint">{g.earned}/{g.total} — {pct}%</span>
+              </div>
+              <span class="cheevo-game-arrow">›</span>
+            </a>
+          );
+        })}
+      </div>
+    </>
+  ) : (
+    <div class="empty-sync">
+      <p>Os dados vêm do RetroAchievements e são gravados no repositório pelo script de sync — o site nunca chama a API em runtime, então funciona offline.</p>
+      <p>Pra popular esta área:</p>
+      <ol>
+        <li>Copie <code>.env.example</code> para <code>.env</code> e preencha <code>RA_USERNAME</code> e <code>RA_API_KEY</code>.</li>
+        <li>Rode <code>npm run cheevos:sync</code>.</li>
+        <li>Rode <code>npm run build</code> e faça commit dos dados gerados.</li>
+      </ol>
+    </div>
+  )}
+
+  <script>
+    // Filtro client-side: a lista é estática e pode ter centenas de jogos,
+    // então esconder no DOM é mais barato que qualquer coisa mais esperta.
+    const input = document.querySelector<HTMLInputElement>('[data-cheevos-search]');
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cheevo-item]'));
+    const empty = document.querySelector<HTMLElement>('[data-cheevos-empty]');
+
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      let visible = 0;
+      for (const el of items) {
+        const hit = !q || (el.dataset.search ?? '').includes(q);
+        el.hidden = !hit;
+        if (hit) visible++;
+      }
+      if (empty) empty.hidden = visible > 0;
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .sync-line { margin: 0 0 var(--s-lg); }
+
+  /* busca: mesmo padrão da pokédex */
+  .mon-search-wrapper {
+    display: flex; align-items: center; gap: 8px; margin-bottom: var(--s-lg);
+    padding: 0 12px; background: var(--surface-2);
+    border: 1px solid var(--hairline); border-radius: var(--r-md);
+    color: var(--muted);
+  }
+  .mon-search-wrapper :global(.icon) { font-size: 18px; flex: none; }
+  .mon-search {
+    display: block; flex: 1; margin-bottom: 0;
+    padding: 10px 0; font: inherit; font-size: 16px;
+    color: var(--ink); background: transparent; border: none;
+  }
+  .mon-search:focus { outline: none; }
+  .mon-search::placeholder { color: var(--muted); }
+
+  .cheevos-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+
+  .cheevo-game {
+    display: flex; align-items: center; gap: var(--s-md);
+    border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    background: var(--surface); padding: var(--s-sm) var(--s-md);
+  }
+  .cheevo-game:hover { border-color: var(--accent); text-decoration: none; }
+  .cheevo-game[hidden] { display: none; }
+
+  .cheevo-game-icon {
+    width: 56px; height: 56px; object-fit: contain; flex: none;
+    background: var(--surface-2); border-radius: var(--r-sm);
+    image-rendering: pixelated;
+  }
+  .cheevo-game-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cheevo-game-info strong {
+    font-size: 15px; letter-spacing: -0.32px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cheevo-game-info .hint {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .award {
+    align-self: flex-start; margin-top: 2px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    color: var(--muted); background: var(--surface-2);
+    border: 1px solid var(--hairline);
+  }
+  /* dourado = 100%; os outros ficam neutros pra não competir */
+  .award-mastered, .award-completed {
+    color: #b45309; background: #fef3c7; border-color: #fcd34d;
+  }
+
+  .cheevo-game-progress {
+    flex: none; width: 96px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+  }
+  .progress {
+    width: 100%; height: 6px; background: var(--surface-2);
+    border-radius: var(--r-pill); overflow: hidden;
+  }
+  .progress span { display: block; height: 100%; background: var(--accent); }
+  .cheevo-game-progress .hint { font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cheevo-game-arrow { flex: none; color: var(--muted); font-size: 18px; }
+
+  .empty-sync { color: var(--muted); font-size: 15px; line-height: 1.6; }
+  .empty-sync ol { padding-left: 1.2em; }
+  .empty-sync li { margin-bottom: 6px; }
+
+  @media (max-width: 480px) {
+    .cheevo-game-progress { width: 64px; }
+    .cheevo-game-icon { width: 44px; height: 44px; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .award-mastered, .award-completed {
+      color: #fcd34d; background: rgba(252, 211, 77, 0.12); border-color: rgba(252, 211, 77, 0.35);
+    }
+  }
+</style>

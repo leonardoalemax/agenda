@@ -1,0 +1,127 @@
+[
+	{
+		"jogo": "Pokémon X",
+		"marca": "Blue pentagon",
+		"png_url": "Blue_pentagon_VI_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Y",
+		"marca": "Blue pentagon",
+		"png_url": "Blue_pentagon_VI_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Omega Ruby",
+		"marca": "Blue pentagon",
+		"png_url": "Blue_pentagon_VI_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Alpha Sapphire",
+		"marca": "Blue pentagon",
+		"png_url": "Blue_pentagon_VI_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Sun",
+		"marca": "Black clover",
+		"png_url": "Black_clover_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Moon",
+		"marca": "Black clover",
+		"png_url": "Black_clover_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Ultra Sun",
+		"marca": "Black clover",
+		"png_url": "Black_clover_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Ultra Moon",
+		"marca": "Black clover",
+		"png_url": "Black_clover_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Red/Blue/Yellow (Virtual Console)",
+		"marca": "Game Boy origin mark",
+		"png_url": "GB_icon_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Gold/Silver/Crystal (Virtual Console)",
+		"marca": "Game Boy origin mark",
+		"png_url": "GB_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon GO",
+		"marca": "GO origin mark",
+		"png_url": "GO_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon: Let's Go, Pikachu!",
+		"marca": "Let's Go origin mark",
+		"png_url": "Let's_Go_icon_HOME.png"
+	},
+	{
+		"jogo": "Pokémon: Let's Go, Eevee!",
+		"marca": "Let's Go origin mark",
+		"png_url": "Let's_Go_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Sword",
+		"marca": "Galar symbol",
+		"png_url": "Galar_symbol_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Shield",
+		"marca": "Galar symbol",
+		"png_url": "Galar_symbol_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Brilliant Diamond",
+		"marca": "Brilliant Diamond and Shining Pearl origin mark",
+		"png_url": "BDSP_icon_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Shining Pearl",
+		"marca": "Brilliant Diamond and Shining Pearl origin mark",
+		"png_url": "BDSP_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Legends: Arceus",
+		"marca": "Legends: Arceus origin mark",
+		"png_url": "Arceus_mark_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon FireRed (Nintendo Switch)",
+		"marca": "Game Boy Advance origin mark",
+		"png_url": "GBA_icon_HOME.png"
+	},
+	{
+		"jogo": "Pokémon LeafGreen (Nintendo Switch)",
+		"marca": "Game Boy Advance origin mark",
+		"png_url": "GBA_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Scarlet",
+		"marca": "Scarlet and Violet origin mark",
+		"png_url": "Paldea_icon_HOME.png"
+	},
+	{
+		"jogo": "Pokémon Violet",
+		"marca": "Scarlet and Violet origin mark",
+		"png_url": "Paldea_icon_HOME.png"
+	},
+
+	{
+		"jogo": "Pokémon Legends: Z-A",
+		"marca": "Legends: Z-A origin mark",
+		"png_url": "Z-A_icon_HOME.png"
+	}
+]

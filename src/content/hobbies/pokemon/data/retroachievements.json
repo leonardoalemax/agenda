@@ -1,0 +1,188 @@
+{
+	"source": "RetroAchievements API_GetGameList",
+	"syncedAt": "2026-08-14T18:51:17.174Z",
+	"matched": {
+		"red": {
+			"raId": 724,
+			"raTitle": "Pokémon Red Version",
+			"console": "Game Boy",
+			"achievements": 93,
+			"points": 745
+		},
+		"blue": {
+			"raId": 586,
+			"raTitle": "Pokémon Blue Version",
+			"console": "Game Boy",
+			"achievements": 90,
+			"points": 678
+		},
+		"yellow": {
+			"raId": 723,
+			"raTitle": "Pokémon Yellow Version: Special Pikachu Edition",
+			"console": "Game Boy",
+			"achievements": 76,
+			"points": 458
+		},
+		"gold": {
+			"raId": 576,
+			"raTitle": "Pokémon Gold Version",
+			"console": "Game Boy Color",
+			"achievements": 72,
+			"points": 685
+		},
+		"silver": {
+			"raId": 722,
+			"raTitle": "Pokémon Silver Version",
+			"console": "Game Boy Color",
+			"achievements": 75,
+			"points": 616
+		},
+		"crystal": {
+			"raId": 810,
+			"raTitle": "Pokémon Crystal Version",
+			"console": "Game Boy Color",
+			"achievements": 113,
+			"points": 864
+		},
+		"ruby": {
+			"raId": 790,
+			"raTitle": "Pokémon Ruby Version",
+			"console": "Game Boy Advance",
+			"achievements": 49,
+			"points": 485
+		},
+		"sapphire": {
+			"raId": 791,
+			"raTitle": "Pokémon Sapphire Version",
+			"console": "Game Boy Advance",
+			"achievements": 49,
+			"points": 485
+		},
+		"emerald": {
+			"raId": 668,
+			"raTitle": "Pokémon Emerald Version",
+			"console": "Game Boy Advance",
+			"achievements": 197,
+			"points": 2086
+		},
+		"firered": {
+			"raId": 515,
+			"raTitle": "Pokémon FireRed Version",
+			"console": "Game Boy Advance",
+			"achievements": 61,
+			"points": 453
+		},
+		"leafgreen": {
+			"raId": 788,
+			"raTitle": "Pokémon LeafGreen Version",
+			"console": "Game Boy Advance",
+			"achievements": 128,
+			"points": 781
+		},
+		"colosseum": {
+			"raId": 7423,
+			"raTitle": "Pokémon Colosseum",
+			"console": "GameCube",
+			"achievements": 84,
+			"points": 675
+		},
+		"xd": {
+			"raId": 3780,
+			"raTitle": "Pokémon XD: Gale of Darkness",
+			"console": "GameCube",
+			"achievements": 151,
+			"points": 1370
+		},
+		"diamond": {
+			"raId": 9852,
+			"raTitle": "Pokémon Diamond Version",
+			"console": "Nintendo DS",
+			"achievements": 121,
+			"points": 976
+		},
+		"pearl": {
+			"raId": 25369,
+			"raTitle": "Pokémon Pearl Version",
+			"console": "Nintendo DS",
+			"achievements": 210,
+			"points": 1336
+		},
+		"platinum": {
+			"raId": 11732,
+			"raTitle": "Pokémon Platinum Version",
+			"console": "Nintendo DS",
+			"achievements": 101,
+			"points": 1254
+		},
+		"heartgold": {
+			"raId": 7212,
+			"raTitle": "Pokémon HeartGold Version | Pokémon SoulSilver Version",
+			"console": "Nintendo DS",
+			"achievements": 136,
+			"points": 1605
+		},
+		"soulsilver": {
+			"raId": 7212,
+			"raTitle": "Pokémon HeartGold Version | Pokémon SoulSilver Version",
+			"console": "Nintendo DS",
+			"achievements": 136,
+			"points": 1605
+		},
+		"black": {
+			"raId": 3887,
+			"raTitle": "Pokémon Black Version",
+			"console": "Nintendo DS",
+			"achievements": 118,
+			"points": 867
+		},
+		"white": {
+			"raId": 16211,
+			"raTitle": "Pokémon White Version",
+			"console": "Nintendo DS",
+			"achievements": 73,
+			"points": 699
+		},
+		"black-2": {
+			"raId": 5853,
+			"raTitle": "Pokémon Black Version 2",
+			"console": "Nintendo DS",
+			"achievements": 187,
+			"points": 1787
+		},
+		"white-2": {
+			"raId": 16197,
+			"raTitle": "Pokémon White Version 2",
+			"console": "Nintendo DS",
+			"achievements": 151,
+			"points": 1220
+		}
+	},
+	"unsupported": {
+		"red-japan": "Pocket Monsters Aka não tem entrada no RetroAchievements",
+		"green-japan": "Pocket Monsters Midori existe (~Z~) mas sem conquistas próprias — só um subset tem",
+		"blue-japan": "Pocket Monsters Ao existe mas sem conquistas próprias — só subsets têm",
+		"x": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"y": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"omega-ruby": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"alpha-sapphire": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"sun": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"moon": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"ultra-sun": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"ultra-moon": "Nintendo 3DS — sem jogos com conquistas no RetroAchievements",
+		"lets-go-pikachu": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"lets-go-eevee": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"sword": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"shield": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"the-isle-of-armor": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"the-crown-tundra": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"brilliant-diamond": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"shining-pearl": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"legends-arceus": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"scarlet": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"violet": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"the-teal-mask": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"the-indigo-disk": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"legends-za": "Nintendo Switch — sem jogos com conquistas no RetroAchievements",
+		"mega-dimension": "Nintendo Switch — sem jogos com conquistas no RetroAchievements"
+	}
+}

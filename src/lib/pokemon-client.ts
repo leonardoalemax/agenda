@@ -14,10 +14,11 @@ import {
   updateTrainerId,
   deleteSave,
   setSaveMovedToHome,
+  setSaveCompleted,
   REMOTE_SYNC_EVENT,
   type PokemonSave,
 } from './store';
-import { ownedKey, caughtKey, spritePath, type Media } from './pokemon';
+import { ownedKey, caughtKey, spritePath, originMarkPath, type Media } from './pokemon';
 import { withBase } from './base';
 
 const CAUGHT_PREFIX = 'pokemon-caught::';
@@ -605,9 +606,14 @@ export function initPokemonHomePage() {
                 ${box
                   .map((e) => {
                     const isCaught = Boolean(caught[caughtKey(s.trainerId, e.species)]);
+                    const markRelPath = originMarkPath(s.game);
+                    const markPath = markRelPath ? withBase(markRelPath) : null;
                     return `
                     <li class="home-mon${isCaught ? ' caught' : ''}">
-                      <img src="${withBase(spritePath(e.id))}" alt="" width="96" height="96" loading="lazy" decoding="async" />
+                      <div class="home-mon-sprite-wrapper">
+                        <img class="home-mon-sprite" src="${withBase(spritePath(e.id))}" alt="" width="56" height="56" loading="lazy" decoding="async" />
+                        ${markPath ? `<img class="home-mon-origin-mark" src="${markPath}" alt="" width="16" height="16" loading="lazy" decoding="async" />` : ''}
+                      </div>
                       <span class="home-mon-num">#${String(e.number).padStart(3, '0')}</span>
                       <span class="home-mon-name">${escapeHtml(e.name)}</span>
                     </li>`;

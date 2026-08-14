@@ -2,10 +2,14 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 // Coleção "agenda": diários, checklists e páginas custom.
-// O campo `type` no frontmatter decide o layout. Excluímos `hobbies/`,
-// que tem coleções próprias (ex.: gunpla) com schema diferente.
+// O campo `type` no frontmatter decide o layout.
+//
+// A exclusão é `hobbies/**` inteiro, não só os `.md`: além das coleções com
+// schema próprio (gunpla), `hobbies/` guarda JSON de dados (pokédex, marcas de
+// origem, mapa do RetroAchievements, conquistas). Excluindo só `.md`, esses
+// JSON entravam aqui e estouravam o schema com "title: Required".
 const agenda = defineCollection({
-  loader: glob({ pattern: ['**/*.md', '!hobbies/**/*.md'], base: './src/content' }),
+  loader: glob({ pattern: ['**/*.md', '!hobbies/**'], base: './src/content' }),
   schema: z.object({
     // tipo de conteúdo -> layout dedicado
     type: z.enum(['diario', 'checklist', 'custom']).default('custom'),

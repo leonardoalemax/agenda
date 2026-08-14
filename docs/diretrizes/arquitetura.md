@@ -22,8 +22,13 @@ src/
   lib/                store (IndexedDB), base (links), helpers de domínio
   styles/global.css   estilos globais (tema claro/escuro)
 public/               assets estáticos + imagens (offline) + ícones PWA
-scripts/              scripts one-off (gen-icons, importadores)
+scripts/              scripts one-off (gen-icons, importadores, syncs de build)
 ```
+
+Dados de API externa não são buscados em runtime: um script em `scripts/` baixa
+e commita JSON + imagens, e a página só lê o arquivo (ver
+[dados-e-sync.md](dados-e-sync.md) → "Sync de build"). Hoje: `cheevos:sync`
+(RetroAchievements).
 
 ## Roteamento e `base`
 

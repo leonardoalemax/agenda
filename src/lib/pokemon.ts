@@ -11,6 +11,7 @@ import generations from "../content/hobbies/pokemon/data/generations.json";
 import platformsByGen from "../content/hobbies/pokemon/data/platforms-by-generation.json";
 import pokedexes from "../content/hobbies/pokemon/data/pokedexes.json";
 import boxLayout from "../content/hobbies/pokemon/data/box-layout.json";
+import originMarkData from "../content/hobbies/pokemon/data/origin_mark.json";
 
 export interface Generation {
 	id: number;
@@ -216,4 +217,100 @@ export function spritePath(id: number): string {
 
 export function coverPath(game: string): string {
 	return `hobbies/pokemon/covers/${game}.webp`;
+}
+
+interface OriginMarkEntry {
+	jogo: string;
+	marca: string;
+	png_url: string;
+}
+
+const originMarks = originMarkData as OriginMarkEntry[];
+
+// Mapeia slug de jogo → nome exato do campo "jogo" em origin_mark.json.
+// Alguns jogos antigos (ex.: gen I/II) compartilham uma única entrada
+// "(Virtual Console)" porque o mark de origem é o mesmo pra todos eles.
+const ORIGIN_MARK_GAME_MAP: Record<string, string> = {
+	x: "Pokémon X",
+	y: "Pokémon Y",
+	"omega-ruby": "Pokémon Omega Ruby",
+	"alpha-sapphire": "Pokémon Alpha Sapphire",
+	sun: "Pokémon Sun",
+	moon: "Pokémon Moon",
+	"ultra-sun": "Pokémon Ultra Sun",
+	"ultra-moon": "Pokémon Ultra Moon",
+	red: "Pokémon Red/Blue/Yellow (Virtual Console)",
+	blue: "Pokémon Red/Blue/Yellow (Virtual Console)",
+	yellow: "Pokémon Red/Blue/Yellow (Virtual Console)",
+	"red-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
+	"green-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
+	"blue-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
+	gold: "Pokémon Gold/Silver/Crystal (Virtual Console)",
+	silver: "Pokémon Gold/Silver/Crystal (Virtual Console)",
+	crystal: "Pokémon Gold/Silver/Crystal (Virtual Console)",
+	"lets-go-pikachu": "Pokémon: Let's Go, Pikachu!",
+	"lets-go-eevee": "Pokémon: Let's Go, Eevee!",
+	sword: "Pokémon Sword",
+	shield: "Pokémon Shield",
+	"brilliant-diamond": "Pokémon Brilliant Diamond",
+	"shining-pearl": "Pokémon Shining Pearl",
+	"legends-arceus": "Pokémon Legends: Arceus",
+	"legends-za": "Pokémon Legends: Z-A",
+	scarlet: "Pokémon Scarlet",
+	violet: "Pokémon Violet",
+};
+
+/** Nome do arquivo local a partir da URL do Bulbapedia (mesmo basename usado em public/hobbies/pokemon/marks/). */
+function markFileFromUrl(url: string): string {
+	return decodeURIComponent(url.split("/").pop() ?? "");
+}
+
+/** Origin mark do jogo (o selo que indica de onde o pokémon veio), se houver um cadastrado. */
+// ===== ponte com o RetroAchievements (área Cheevos) =====
+//
+// Gerado por `npm run pokemon:ra-map` e commitado. Lido por `import.meta.glob`
+// porque o arquivo pode não existir (antes de rodar o script) — um import
+// direto quebraria o build.
+
+export interface RetroGame {
+	raId: number;
+	raTitle: string;
+	console: string;
+	achievements: number;
+	points: number;
+}
+
+interface RetroMap {
+	source: string;
+	syncedAt: string;
+	matched: Record<string, RetroGame>;
+	unsupported: Record<string, string>;
+}
+
+const retroFiles = import.meta.glob<RetroMap>(
+	"../content/hobbies/pokemon/data/retroachievements.json",
+	{ eager: true, import: "default" },
+);
+const retroMap: RetroMap | null = Object.values(retroFiles)[0] ?? null;
+
+/** Jogo equivalente no RetroAchievements, ou null se não existe / sem mapa. */
+export function retroGameFor(game: string): RetroGame | null {
+	return retroMap?.matched[game] ?? null;
+}
+
+/** Por que este jogo não tem equivalente (console fora do RA), se for o caso. */
+export function retroUnsupportedReason(game: string): string | null {
+	return retroMap?.unsupported[game] ?? null;
+}
+
+export function hasRetroMap(): boolean {
+	return retroMap !== null;
+}
+
+export function originMarkPath(game: string): string | null {
+	const jogo = ORIGIN_MARK_GAME_MAP[game];
+	if (!jogo) return null;
+	const entry = originMarks.find((m) => m.jogo === jogo);
+	if (!entry) return null;
+	return `hobbies/pokemon/marks/${markFileFromUrl(entry.png_url)}`;
 }

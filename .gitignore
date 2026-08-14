@@ -9,7 +9,7 @@ dist/
 public/icons/*.png
 dev-dist/
 
-# env (chaves do Supabase) — .env.local.example fica versionado
+# env (credenciais dos scripts de sync) — .env.example fica versionado
 .env
 .env.local
 .env.*.local

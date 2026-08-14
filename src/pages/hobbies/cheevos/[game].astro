@@ -1,0 +1,245 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/base';
+import {
+  allCheevosGames,
+  achievementsFor,
+  isEarned,
+  gameIconPath,
+  badgePath,
+  awardLabel,
+  type CheevosGame,
+} from '../../../lib/cheevos';
+
+export async function getStaticPaths() {
+  // Sem sync ainda? Nenhuma rota — a index cuida de explicar o que fazer.
+  return allCheevosGames().map((g) => ({
+    params: { game: String(g.id) },
+    props: { game: g },
+  }));
+}
+
+interface Props {
+  game: CheevosGame;
+}
+const { game } = Astro.props;
+
+const achievements = achievementsFor(game.id);
+const pct = game.total ? Math.round((game.earned / game.total) * 100) : 0;
+const award = awardLabel(game.award);
+
+// O RA devolve "2023-05-14 22:11:03"; sem o T o Safari não parseia.
+const fmtDate = (raw: string | null) => {
+  if (!raw) return '';
+  const d = new Date(raw.replace(' ', 'T'));
+  return Number.isNaN(d.getTime())
+    ? ''
+    : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(d);
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  progression: 'progressão',
+  win_condition: 'final',
+  missable: 'perdível',
+};
+---
+
+<BaseLayout title={`${game.title} — cheevos`} description={`Conquistas de ${game.title}`}>
+  <a class="back" href={withBase('hobbies/cheevos')}>← cheevos</a>
+
+  <header class="doc-header cheevo-hero">
+    <img
+      class="cheevo-hero-icon"
+      src={withBase(gameIconPath(game.icon))}
+      alt=""
+      width="72"
+      height="72"
+      decoding="async" />
+    <div>
+      <h1>{game.title}</h1>
+      <p class="hint" style="margin:4px 0 0;">
+        {game.console}
+        {award && <> · <span class={`award award-${game.award}`}>{award}</span></>}
+      </p>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div
+      class="progress"
+      role="progressbar"
+      aria-label="Progresso das conquistas"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow={pct}>
+      <span style={`width:${pct}%`}></span>
+    </div>
+    <span class="hint">{game.earned}/{game.total} — {pct}%</span>
+  </div>
+
+  <p class="hint points-line">
+    {game.earnedPoints}/{game.points} pontos
+    {game.earnedHardcore > 0 && <> · {game.earnedHardcore} em hardcore</>}
+  </p>
+
+  {achievements.length > 0 ? (
+    <>
+      <div class="filters" role="group" aria-label="Filtrar conquistas">
+        <button class="filter-btn active" type="button" data-filter="all" aria-pressed="true">Todas</button>
+        <button class="filter-btn" type="button" data-filter="earned" aria-pressed="false">Feitas</button>
+        <button class="filter-btn" type="button" data-filter="locked" aria-pressed="false">Faltam</button>
+      </div>
+      <p class="hint" data-filter-empty hidden>Nenhuma conquista nesse filtro.</p>
+
+      <ul class="cheevo-list">
+        {achievements.map((a) => {
+          const earned = isEarned(a);
+          const when = fmtDate(a.earnedHardcoreAt ?? a.earnedAt);
+          return (
+            <li class={`cheevo${earned ? ' earned' : ''}`} data-cheevo data-state={earned ? 'earned' : 'locked'}>
+              <img
+                class="cheevo-badge"
+                src={withBase(badgePath(a.badge, earned))}
+                alt=""
+                width="64"
+                height="64"
+                loading="lazy"
+                decoding="async" />
+              <div class="cheevo-info">
+                <strong>{a.title}</strong>
+                <span class="cheevo-desc">{a.description}</span>
+                <span class="cheevo-meta">
+                  <span class="cheevo-points">{a.points} pts</span>
+                  {a.type && TYPE_LABELS[a.type] && (
+                    <span class={`cheevo-type type-${a.type}`}>{TYPE_LABELS[a.type]}</span>
+                  )}
+                  {earned && when && <span class="cheevo-date">{when}</span>}
+                  {a.earnedHardcoreAt && <span class="cheevo-hardcore">hardcore</span>}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  ) : (
+    <p class="hint">Este jogo não tem conquistas cadastradas no RetroAchievements.</p>
+  )}
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cheevo]'));
+    const empty = document.querySelector<HTMLElement>('[data-filter-empty]');
+
+    for (const btn of buttons) {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.filter;
+
+        for (const b of buttons) {
+          const on = b === btn;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-pressed', String(on));
+        }
+
+        let visible = 0;
+        for (const el of items) {
+          const hit = mode === 'all' || el.dataset.state === mode;
+          el.hidden = !hit;
+          if (hit) visible++;
+        }
+        if (empty) empty.hidden = visible > 0;
+      });
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .cheevo-hero { display: flex; align-items: center; gap: var(--s-md); }
+  .cheevo-hero-icon {
+    width: 72px; height: 72px; object-fit: contain; flex: none;
+    background: var(--surface-2); border-radius: var(--r-md);
+    image-rendering: pixelated;
+  }
+  .cheevo-hero h1 { margin: 0; }
+
+  .award {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    color: var(--muted); background: var(--surface-2);
+    border: 1px solid var(--hairline);
+  }
+  .award-mastered, .award-completed {
+    color: #b45309; background: #fef3c7; border-color: #fcd34d;
+  }
+
+  .progress-wrap { display: flex; align-items: center; gap: var(--s-md); margin-bottom: var(--s-xs); }
+  .progress { flex: 1; height: 6px; background: var(--surface-2); border-radius: var(--r-pill); overflow: hidden; }
+  .progress span { display: block; height: 100%; background: var(--accent); transition: width .2s ease; }
+  .progress-wrap .hint { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .points-line { margin: 0 0 var(--s-lg); font-variant-numeric: tabular-nums; }
+
+  .filters { display: flex; gap: var(--s-sm); margin-bottom: var(--s-lg); }
+  .filter-btn {
+    padding: 6px 14px; border-radius: var(--r-pill);
+    font: inherit; font-size: 14px; font-weight: 500;
+    color: var(--muted); background: transparent;
+    border: 1px solid var(--hairline); cursor: pointer;
+  }
+  .filter-btn:hover { border-color: var(--accent); }
+  .filter-btn.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+
+  .cheevo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-sm); }
+
+  .cheevo {
+    display: flex; align-items: flex-start; gap: var(--s-md);
+    border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    background: var(--surface); padding: var(--s-sm) var(--s-md);
+  }
+  .cheevo[hidden] { display: none; }
+  /* feita ganha destaque; a que falta fica sóbria — mesma lógica do sprite
+     colorido vs. cinza da pokédex. */
+  .cheevo.earned { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+
+  .cheevo-badge {
+    width: 56px; height: 56px; object-fit: contain; flex: none;
+    border-radius: var(--r-sm); image-rendering: pixelated;
+  }
+  .cheevo:not(.earned) .cheevo-badge { opacity: .5; }
+
+  .cheevo-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .cheevo-info strong { font-size: 15px; letter-spacing: -0.32px; }
+  .cheevo-desc { font-size: 14px; color: var(--muted); line-height: 1.4; }
+
+  .cheevo-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--faint); margin-top: 2px;
+  }
+  .cheevo-points { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); }
+  .cheevo-date { font-variant-numeric: tabular-nums; }
+  .cheevo-type {
+    padding: 1px 7px; border-radius: var(--r-pill);
+    background: var(--surface-2); border: 1px solid var(--hairline);
+  }
+  .type-missable { color: #b45309; }
+  .type-win_condition { color: #16a34a; }
+  .cheevo-hardcore {
+    padding: 1px 7px; border-radius: var(--r-pill);
+    color: #dc2626; background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    font-weight: 600;
+  }
+
+  @media (max-width: 480px) {
+    .cheevo-badge { width: 44px; height: 44px; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .award-mastered, .award-completed {
+      color: #fcd34d; background: rgba(252, 211, 77, 0.12); border-color: rgba(252, 211, 77, 0.35);
+    }
+    .type-missable { color: #fbbf24; }
+    .type-win_condition { color: #4ade80; }
+    .cheevo-hardcore { color: #f87171; }
+  }
+</style>

@@ -4,8 +4,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Backup from '../components/Backup.astro';
 import SyncPanel from '../components/SyncPanel.astro';
 import { withBase } from '../lib/base';
+import { cheevosIndex } from '../lib/cheevos';
 
 const entries = await getCollection('agenda');
+
+const cheevos = cheevosIndex();
+const cheevosLine = cheevos
+  ? `${cheevos.totals.earned} conquistas em ${cheevos.totals.games} jogos`
+  : 'Conquistas do RetroAchievements';
 
 // ordena por data (mais recente primeiro); sem data vai pro fim
 const sorted = entries.sort((a, b) => {
@@ -51,6 +57,13 @@ const fmt = (d?: Date) =>
       <span>
         <span class="a-title">Pokémon</span>
         <small>Jogos que tenho + saves com pokédex</small>
+      </span>
+    </a>
+    <a class="area-card" href={withBase('hobbies/cheevos')}>
+      <span class="emoji">🏆</span>
+      <span>
+        <span class="a-title">Cheevos</span>
+        <small>{cheevosLine}</small>
       </span>
     </a>
   </div>

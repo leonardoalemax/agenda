@@ -1,9 +1,28 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { withBase } from '../../../lib/base';
-import { allGenerations, generationLabel, gameName, mediaForGame, mediaLabel, coverPath } from '../../../lib/pokemon';
+import { allGenerations, generationLabel, gameName, mediaForGame, mediaLabel, coverPath, retroGameFor } from '../../../lib/pokemon';
+import { cheevosGame } from '../../../lib/cheevos';
 
 const gens = allGenerations();
+
+// Progresso de conquistas do jogo, quando ele existe no RetroAchievements.
+// Dois dados diferentes se cruzam aqui:
+//  - o mapa (pokemon:ra-map) diz *se* o jogo tem conquistas e quantas;
+//  - o sync (cheevos:sync) diz quantas *eu* fiz — e só lista jogo que joguei.
+// Por isso o total cai pro mapa: jogo com conquistas que nunca toquei aparece
+// como 0/N em vez de sumir.
+function cheevosFor(slug: string) {
+  const retro = retroGameFor(slug);
+  if (!retro) return null;
+
+  const played = cheevosGame(retro.raId);
+  const total = played?.total || retro.achievements;
+  if (!total) return null;
+
+  const earned = played?.earned ?? 0;
+  return { earned, total, pct: Math.round((earned / total) * 100) };
+}
 
 const sections = gens.map((gen) => ({
   gen,
@@ -11,10 +30,12 @@ const sections = gens.map((gen) => ({
     slug: g.slug,
     name: gameName(g.slug),
     media: mediaForGame(gen.name, g.slug),
+    cheevos: cheevosFor(g.slug),
   })),
 }));
 
 const totalGames = sections.reduce((s, x) => s + x.games.length, 0);
+const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevos).length, 0);
 ---
 
 <BaseLayout title="Pokémon · Jogos" description="Quais jogos eu tenho, físico ou digital.">
@@ -25,6 +46,9 @@ const totalGames = sections.reduce((s, x) => s + x.games.length, 0);
     <h1>Jogos</h1>
     <p class="hint" style="margin:.2rem 0 0;">
       {totalGames} jogos · marque físico e/ou digital · a pokédex fica nos <a href={withBase('hobbies/pokemon/saves')}>saves</a>
+      {withCheevos > 0 && (
+        <> · {withCheevos} com <a href={withBase('hobbies/cheevos')}>conquistas</a></>
+      )}
     </p>
   </header>
 
@@ -71,6 +95,22 @@ const totalGames = sections.reduce((s, x) => s + x.games.length, 0);
                 </label>
               ))}
             </div>
+            {game.cheevos && (
+              <div
+                class={`game-cheevos${game.cheevos.earned === 0 ? ' empty' : ''}`}
+                title={`${game.cheevos.earned} de ${game.cheevos.total} conquistas no RetroAchievements`}>
+                <div
+                  class="progress"
+                  role="progressbar"
+                  aria-label={`Conquistas de ${game.name}`}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow={game.cheevos.pct}>
+                  <span style={`width:${game.cheevos.pct}%`}></span>
+                </div>
+                <span class="game-cheevos-label">{game.cheevos.earned}/{game.cheevos.total}</span>
+              </div>
+            )}
             <a class="game-saves-link" href={withBase(`hobbies/pokemon/saves/?game=${game.slug}`)}>
               <span>ver saves</span> ›
             </a>
@@ -125,8 +165,27 @@ const totalGames = sections.reduce((s, x) => s + x.games.length, 0);
   }
   .game-saves-link:hover { color: var(--link); }
 
+  /* Conquistas: só aparece em jogo que existe no RetroAchievements, então a
+     ausência da barra já informa "não tem cheevos" — sem precisar de rótulo. */
+  .game-cheevos {
+    flex: none; width: 76px; display: flex; flex-direction: column;
+    gap: 4px; align-items: flex-end;
+  }
+  .game-cheevos .progress {
+    width: 100%; height: 5px; background: var(--surface-2);
+    border-radius: var(--r-pill); overflow: hidden;
+  }
+  .game-cheevos .progress span { display: block; height: 100%; background: var(--accent); }
+  .game-cheevos-label {
+    font-size: 12px; color: var(--muted); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Nunca jogado fica discreto: é oferta, não pendência. */
+  .game-cheevos.empty { opacity: .55; }
+
   @media (max-width: 480px) {
     .media-toggle span { display: none; }
     .game-saves-link span { display: none; }
+    .game-cheevos { width: 56px; }
   }
 </style>

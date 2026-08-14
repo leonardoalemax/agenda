@@ -10,7 +10,9 @@
     "icons": "node scripts/gen-icons.mjs",
     "gunpla:import": "node scripts/gunpla-import.mjs",
     "astro": "astro",
-    "pokemon:sprites": "node scripts/pokemon-sprites.mjs"
+    "pokemon:sprites": "node scripts/pokemon-sprites.mjs",
+    "pokemon:ra-map": "node scripts/pokemon-ra-map.mjs",
+    "cheevos:sync": "node scripts/cheevos-sync.mjs"
   },
   "dependencies": {
     "astro": "^5.2.0",

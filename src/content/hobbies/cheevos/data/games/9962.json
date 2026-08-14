@@ -1,0 +1,259 @@
+{
+	"id": 9962,
+	"title": "Sonic the Hedgehog",
+	"achievements": [
+		{
+			"id": 47166,
+			"title": "Welcome to South Island",
+			"description": "Complete Green Hill Zone.",
+			"points": 5,
+			"badge": "292363",
+			"type": null,
+			"order": 1,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47167,
+			"title": "Troubled Waters",
+			"description": "Complete Bridge Zone.",
+			"points": 5,
+			"badge": "292364",
+			"type": null,
+			"order": 2,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47168,
+			"title": "Angel Falls",
+			"description": "Complete Jungle Zone.",
+			"points": 5,
+			"badge": "292365",
+			"type": null,
+			"order": 3,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47169,
+			"title": "The Damp Depths",
+			"description": "Complete Labyrinth Zone.",
+			"points": 5,
+			"badge": "292366",
+			"type": null,
+			"order": 4,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47170,
+			"title": "Eggman's Maze",
+			"description": "Complete Scrap Brain Zone.",
+			"points": 5,
+			"badge": "292367",
+			"type": null,
+			"order": 5,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47171,
+			"title": "Thunderbolts and Lightning",
+			"description": "Complete Sky Base Zone Act 1.",
+			"points": 5,
+			"badge": "292368",
+			"type": null,
+			"order": 6,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47172,
+			"title": "South Island Hero",
+			"description": "Complete the game.",
+			"points": 25,
+			"badge": "292369",
+			"type": null,
+			"order": 7,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47173,
+			"title": "Jewelry Shopping",
+			"description": "Collect a Chaos Emerald.",
+			"points": 5,
+			"badge": "292370",
+			"type": null,
+			"order": 8,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47174,
+			"title": "Six Gorgeous Gems",
+			"description": "Collect all 6 Chaos Emeralds.",
+			"points": 10,
+			"badge": "292374",
+			"type": null,
+			"order": 9,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47175,
+			"title": "South Island Saviour",
+			"description": "Complete the game with all 6 Chaos Emeralds collected.",
+			"points": 10,
+			"badge": "292375",
+			"type": null,
+			"order": 10,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47176,
+			"title": "I Will Survive",
+			"description": "Complete the game without dying.",
+			"points": 50,
+			"badge": "292376",
+			"type": null,
+			"order": 11,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47177,
+			"title": "Forager Hedgehog",
+			"description": "Break all 18 1-Up monitors in the game.",
+			"points": 25,
+			"badge": "292377",
+			"type": null,
+			"order": 12,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47178,
+			"title": "Sonic Stockpile",
+			"description": "Have 20 lives.",
+			"points": 5,
+			"badge": "292378",
+			"type": null,
+			"order": 13,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47179,
+			"title": "Tastes Like Neon",
+			"description": "Complete a special stage.",
+			"points": 5,
+			"badge": "292371",
+			"type": null,
+			"order": 14,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47180,
+			"title": "Bumper Hogs",
+			"description": "Enter the fifth special stage.",
+			"points": 5,
+			"badge": "292379",
+			"type": null,
+			"order": 15,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47181,
+			"title": "Halfway Hedgehog",
+			"description": "Complete four special stages.",
+			"points": 5,
+			"badge": "292380",
+			"type": null,
+			"order": 16,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47182,
+			"title": "Superb Specialty",
+			"description": "Complete all eight special stages.",
+			"points": 10,
+			"badge": "292381",
+			"type": null,
+			"order": 17,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47183,
+			"title": "Life Insurance",
+			"description": "Accumulate eight continues.",
+			"points": 25,
+			"badge": "292382",
+			"type": null,
+			"order": 18,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47184,
+			"title": "Sonic and the Secret Rings",
+			"description": "Earn ten rings from the bonus panel.",
+			"points": 5,
+			"badge": "292372",
+			"type": null,
+			"order": 19,
+			"earnedAt": "2025-01-11 16:33:32",
+			"earnedHardcoreAt": "2025-01-11 16:33:32"
+		},
+		{
+			"id": 47185,
+			"title": "Say Cheese!",
+			"description": "Earn a 1-Up from the bonus panel.",
+			"points": 5,
+			"badge": "292373",
+			"type": null,
+			"order": 20,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47186,
+			"title": "South Island Superstar",
+			"description": "Complete the game with a 500,000-point special bonus and collect all 1-Ups, all Emeralds, all special stages, and no deaths.",
+			"points": 100,
+			"badge": "292383",
+			"type": null,
+			"order": 21,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47187,
+			"title": "South Island Minimalist",
+			"description": "Complete the game with less than 20,000 points.",
+			"points": 50,
+			"badge": "292384",
+			"type": null,
+			"order": 22,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		},
+		{
+			"id": 47188,
+			"title": "Boost Mode",
+			"description": "Complete any act other than Green Hill Zone Act 1 with a 30,000-point time bonus.",
+			"points": 25,
+			"badge": "292385",
+			"type": null,
+			"order": 23,
+			"earnedAt": null,
+			"earnedHardcoreAt": null
+		}
+	]
+}

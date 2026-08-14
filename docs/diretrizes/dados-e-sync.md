@@ -16,6 +16,11 @@
   gravar sobrescrever o outro — aceito de propósito, em troca de simplicidade.
 - **Portabilidade continua manual também.** Exportar / Importar JSON
   (componente `Backup`) segue funcionando, independente do sync.
+- **Dado de terceiro entra no build, nunca em runtime.** Quando a informação
+  vem de uma API externa (ex.: RetroAchievements), ela é baixada por um script
+  na máquina, commitada como JSON + imagens, e o site gerado só lê o arquivo.
+  O navegador **não** fala com API de terceiro — nem para ter chave no bundle,
+  nem para depender de rede. Ver "Sync de build" abaixo.
 
 ## Camada de acesso: `src/lib/store.ts`
 
@@ -108,3 +113,63 @@ não uma leitura por checkbox (são ~17 mil pokémon somando todos os jogos).
 - `importAll()` faz merge por chave (não apaga o que não veio no arquivo) e
   carimba edição local — então um import manual também sobe no próximo sync.
 - Formato versionado (`version`) para permitir migração futura.
+
+## Sync de build (dado de terceiro): Cheevos / RetroAchievements
+
+Segunda classe de dado do projeto, oposta ao IndexedDB: **read-only, vem de
+fora, e é congelada no commit**. O IndexedDB guarda o que *você edita*; isto
+guarda o que *outro sistema sabe*.
+
+- **Script:** `scripts/cheevos-sync.mjs` (`npm run cheevos:sync`). Roda na sua
+  máquina, sob demanda — **não** faz parte de `npm run build`.
+- **Credenciais:** `RA_USERNAME` e `RA_API_KEY` num `.env` na raiz (ignorado
+  pelo git; modelo em `.env.example`). Mesma regra do token do gist: **nunca no
+  build, nunca no repositório**. Sem elas o script sai com erro explicando o que
+  fazer — o build do site continua funcionando.
+- **Escopo:** todos os jogos que o usuário já jogou
+  (`API_GetUserCompletionProgress`), com as conquistas de cada um
+  (`API_GetGameInfoAndUserProgress`).
+- **Saída (tudo commitado):**
+  - `src/content/hobbies/cheevos/data/index.json` — lista de jogos + totais.
+  - `src/content/hobbies/cheevos/data/games/<id>.json` — conquistas do jogo.
+  - `public/hobbies/cheevos/games/<icon>.png` — ícone do jogo.
+  - `public/hobbies/cheevos/badges/<badge>[_lock].png` — badge de cada
+    conquista, nos dois estados (colorida = feita, `_lock` = falta).
+- **Por que as imagens vêm junto:** diretriz 2 (offline sempre). Servir badge da
+  CDN do RetroAchievements quebraria a área inteira sem rede.
+- **Incremental:** imagem já em disco não é rebaixada; JSON de jogo que saiu do
+  escopo é apagado. Rodar de novo é barato e idempotente.
+- **Leitura:** `src/lib/cheevos.ts`, sempre via `import.meta.glob` — antes do
+  primeiro sync os arquivos não existem e um `import` direto quebraria o build.
+  `getStaticPaths` devolve zero rotas nesse caso e a index mostra o passo a passo.
+
+Ao adicionar outra fonte externa, siga o mesmo desenho: script → JSON + assets
+commitados → `lib` que tolera ausência → página com estado vazio útil.
+
+### Ponte Pokémon ↔ Cheevos
+
+`scripts/pokemon-ra-map.mjs` (`npm run pokemon:ra-map`) relaciona cada jogo da
+área Pokémon ao jogo equivalente no RetroAchievements. Roda sob demanda e o
+resultado é commitado em
+`src/content/hobbies/pokemon/data/retroachievements.json` (~6 KB).
+
+- **Só precisa de `RA_API_KEY`** — lê o catálogo público de jogos, não o
+  progresso de ninguém.
+- **O console vem do projeto**, de `platforms-by-generation.json`; os ids vêm da
+  API. A curadoria no script é só o *título esperado* de cada jogo.
+- **Casamento é por título normalizado e exato.** O RetroAchievements tem
+  centenas de romhacks (`~Hack~ Pokémon Brown`) e subsets
+  (`… [Subset - Professor Oak Challenge]`) que um "contém" pegaria por engano.
+- **Pagine sempre:** `API_GetGameList` devolve no máximo 500 por chamada mesmo
+  com `c` maior. Sem paginar, HeartGold/SoulSilver sumiam por cair depois do
+  corte alfabético.
+- **Ausência é resultado, não erro.** O JSON tem `matched` e `unsupported`, e os
+  48 jogos estão em um dos dois. Hoje: 22 relacionados; 23 fora (3DS e Switch não
+  são emulados no RA) e 3 versões japonesas sem conquistas próprias.
+- **Versão dupla:** HG/SS são uma entrada só lá (`… | …`), então os dois slugs
+  apontam pro mesmo id — o conjunto de conquistas é compartilhado mesmo.
+- Quando um título não casa, o script imprime os títulos parecidos daquele
+  console, pra corrigir a lista `TITLES` sem caçar na mão.
+
+Leitura: `retroGameFor(slug)` / `retroUnsupportedReason(slug)` em
+`src/lib/pokemon.ts` (via `import.meta.glob`, tolerante ao arquivo não existir).

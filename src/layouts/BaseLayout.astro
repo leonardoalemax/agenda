@@ -40,6 +40,17 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
         </a>
         <span class="spacer"></span>
         <span id="pwa-status" class="hint"></span>
+        <button id="btn-refresh" class="icon-btn" type="button" title="Atualizar o app" aria-label="Atualizar o app">
+          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+            <path
+              d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -55,7 +66,11 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
 
     <script>
       import { registerSW } from 'virtual:pwa-register';
+      import { initSync } from '../lib/init-sync';
+
       const status = document.getElementById('pwa-status');
+      const btn = document.getElementById('btn-refresh') as HTMLButtonElement | null;
+
       registerSW({
         immediate: true,
         onOfflineReady() {
@@ -65,6 +80,58 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
           }
         },
       });
+
+      function flash(text: string) {
+        if (!status) return;
+        status.textContent = text;
+        status.className = 'hint offline-ready';
+      }
+
+      // Botão "atualizar": em vez de só pedir pro SW atual buscar uma versão
+      // nova (que às vezes não é suficiente — SW órfão de outra versão do
+      // scope, cache antigo que o precache não limpou), derruba TUDO que
+      // pode estar servindo conteúdo velho: desregistra todo service worker
+      // deste scope, apaga todo Cache Storage, e só then recarrega. Isso
+      // sempre resulta em HTML/JS/CSS frescos da rede, nunca uma tela velha.
+      btn?.addEventListener('click', async () => {
+        if (btn.classList.contains('busy')) return;
+        btn.classList.add('busy');
+        flash('atualizando…');
+
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map((r) => r.unregister()));
+          }
+          if ('caches' in window) {
+            const names = await caches.keys();
+            await Promise.all(names.map((n) => caches.delete(n)));
+          }
+          // Limpa IndexedDB completamente
+          if ('indexedDB' in window) {
+            await Promise.all(
+              Array.from(await indexedDB.databases()).map(
+                (db) => new Promise<void>((resolve) => {
+                  const req = indexedDB.deleteDatabase(db.name);
+                  req.onsuccess = () => resolve();
+                  req.onerror = () => resolve(); // ignora erros
+                })
+              )
+            );
+          }
+        } catch {
+          // segue pro reload mesmo se algo falhar aqui — melhor recarregar
+          // sem ter limpado tudo do que travar no botão de update
+        }
+        // location.reload() poderia ainda pegar HTML do bfcache/HTTP cache;
+        // força busca de rede de verdade trocando a URL (cache-bust).
+        const u = new URL(location.href);
+        u.searchParams.set('_refresh', String(Date.now()));
+        location.replace(u.toString());
+      });
+
+      // Inicializa o sync por gist (inerte se não houver token neste aparelho)
+      initSync();
     </script>
   </body>
 </html>

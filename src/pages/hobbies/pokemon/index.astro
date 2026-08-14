@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/base';
+import { allGenerations, generationLabel, gameName, mediaForGame, mediaLabel, coverPath } from '../../../lib/pokemon';
+
+const gens = allGenerations();
+
+const sections = gens.map((gen) => ({
+  gen,
+  games: gen.games.map((g) => ({
+    slug: g.slug,
+    name: gameName(g.slug),
+    media: mediaForGame(gen.name, g.slug),
+  })),
+}));
+
+const totalGames = sections.reduce((s, x) => s + x.games.length, 0);
+---
+
+<BaseLayout title="Pokémon · Jogos" description="Quais jogos eu tenho, físico ou digital.">
+  <a class="back" href={withBase('')}>← agenda</a>
+
+  <header class="doc-header">
+    <span class="badge pokemon">pokémon</span>
+    <h1>Jogos</h1>
+    <p class="hint" style="margin:.2rem 0 0;">
+      {totalGames} jogos · marque físico e/ou digital · a pokédex fica nos <a href={withBase('hobbies/pokemon/saves')}>saves</a>
+    </p>
+  </header>
+
+  <nav class="subnav">
+    <span class="subnav-item active">Jogos</span>
+    <a class="subnav-item" href={withBase('hobbies/pokemon/saves')}>Saves</a>
+    <a class="subnav-item" href={withBase('hobbies/pokemon/home')}>HOME</a>
+  </nav>
+
+  {sections.map(({ gen, games }) => (
+    <section class="gen">
+      <h2 class="section-title">
+        {generationLabel(gen)}
+        <small class="gen-region">{gen.region}</small>
+      </h2>
+
+      <div class="game-list">
+        {games.map((game) => (
+          <article class="game">
+            <img
+              class="game-cover"
+              src={withBase(coverPath(game.slug))}
+              alt=""
+              width="400"
+              height="400"
+              loading="lazy"
+              decoding="async" />
+            <h3>{game.name}</h3>
+            <div class="media-row">
+              {game.media.map((m) => (
+                <label class="media-toggle" data-media={m}>
+                  <input type="checkbox" data-owned={`${game.slug}::${m}`} />
+                  {m === 'physical' ? (
+                    <svg class="media-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/>
+                      <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    </svg>
+                  ) : (
+                    <svg class="media-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M4.5 12.5a2.75 2.75 0 0 1-.4-5.47 3.5 3.5 0 0 1 6.78-1.62A2.75 2.75 0 0 1 11.5 12.5h-7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                    </svg>
+                  )}
+                  <span>{mediaLabel(m)}</span>
+                </label>
+              ))}
+            </div>
+            <a class="game-saves-link" href={withBase(`hobbies/pokemon/saves/?game=${game.slug}`)}>
+              <span>ver saves</span> ›
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <script>
+    import { initPokemonGames } from '../../../lib/pokemon-client';
+    initPokemonGames();
+  </script>
+</BaseLayout>
+
+<style>
+  .subnav { display: flex; gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
+  .subnav-item {
+    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
+    color: var(--muted); border: 1px solid var(--hairline);
+  }
+  .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
+  .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+
+  .gen { margin-top: var(--s-lg); }
+  .gen-region {
+    font-size: 13px; font-weight: 400; color: var(--muted);
+    text-transform: capitalize; margin-left: 8px; letter-spacing: 0;
+  }
+
+  .game-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+  .game {
+    border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    background: var(--surface); padding: var(--s-sm) var(--s-md);
+    display: flex; flex-direction: row; align-items: center; gap: var(--s-md);
+  }
+  .game-cover {
+    width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
+    border-radius: var(--r-sm); display: block; flex: none;
+  }
+  .game h3 {
+    margin: 0; font-size: 15px; letter-spacing: -0.374px;
+    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .media-row { display: flex; gap: var(--s-sm); flex-wrap: nowrap; flex: none; }
+  .media-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px; min-height: auto; }
+  .media-toggle input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex: none; }
+  .media-icon { flex: none; color: var(--muted); }
+  .media-toggle:has(input:checked) .media-icon { color: var(--accent); }
+  .game-saves-link {
+    font-size: 13px; color: var(--muted); flex: none; white-space: nowrap;
+  }
+  .game-saves-link:hover { color: var(--link); }
+
+  @media (max-width: 480px) {
+    .media-toggle span { display: none; }
+    .game-saves-link span { display: none; }
+  }
+</style>

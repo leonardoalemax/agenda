@@ -26,28 +26,33 @@ export function initChecklists() {
   const root = document.querySelector<HTMLElement>('[data-checklist]');
   if (!root) return;
   const slug = root.getAttribute('data-slug') || location.pathname;
-  const boxes = root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+  const boxes = Array.from(root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+
+  const keyOf = (box: HTMLInputElement) =>
+    `${slug}::${hash((box.closest('li')?.textContent || '').trim())}`;
+
+  // Relê o estado salvo. Roda na carga e quando o sync traz dado de outro device.
+  async function hydrate() {
+    await Promise.all(
+      boxes.map(async (box) => {
+        const v = await getCheck(keyOf(box));
+        if (v === undefined) return;
+        box.checked = v;
+        box.closest('li')?.classList.toggle('done', v);
+      }),
+    );
+    updateProgress(root!);
+  }
 
   boxes.forEach((box) => {
-    const li = box.closest('li');
-    const text = (li?.textContent || '').trim();
-    const key = `${slug}::${hash(text)}`;
-
     box.disabled = false; // GFM renderiza como disabled por padrão
-    getCheck(key).then((v) => {
-      if (v !== undefined) {
-        box.checked = v;
-        li?.classList.toggle('done', v);
-        updateProgress(root);
-      }
-    });
-
     box.addEventListener('change', () => {
-      li?.classList.toggle('done', box.checked);
-      setCheck(key, box.checked);
+      box.closest('li')?.classList.toggle('done', box.checked);
+      setCheck(keyOf(box), box.checked);
       updateProgress(root);
     });
   });
 
-  updateProgress(root);
+  hydrate();
+  window.addEventListener('agenda:remote-sync', hydrate);
 }

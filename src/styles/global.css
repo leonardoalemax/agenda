@@ -5,6 +5,11 @@
    um único product-shadow. Otimizado para iPad 10 e iPhone (iOS).
    ============================================================ */
 
+/* O `display` de componentes (ex.: .btn { display: inline-flex }) ganha do
+   [hidden] da folha do navegador. Sem isto, esconder um botão por atributo
+   não surte efeito. */
+[hidden] { display: none !important; }
+
 :root {
   /* Fonte: system-ui resolve para SF Pro no iOS/macOS */
   --font: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -133,6 +138,25 @@ a:hover { text-decoration: underline; }
 }
 .spacer { flex: 1; }
 
+/* botão de atualizar no header */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: none;
+  color: var(--link); background: transparent;
+  border: 1px solid var(--hairline); border-radius: var(--r-pill);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+.icon-btn:hover { background: var(--surface-2); border-color: var(--accent); }
+.icon-btn:active { transform: scale(0.94); }
+.icon-btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+.icon-btn.busy { pointer-events: none; color: var(--muted); }
+.icon-btn.busy svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .icon-btn.busy svg { animation: none; }
+}
+
 /* ===== Tipografia utilitária ===== */
 .hero-title {
   font-size: clamp(34px, 8vw, 56px);
@@ -166,7 +190,7 @@ a:hover { text-decoration: underline; }
   color: var(--muted); background: var(--surface-2);
   border: 1px solid var(--hairline);
 }
-.badge.diario, .badge.checklist, .badge.custom, .badge.gunpla { color: var(--muted); }
+.badge.diario, .badge.checklist, .badge.custom, .badge.gunpla, .badge.pokemon { color: var(--muted); }
 
 /* ===== Botões ===== */
 .btn {
@@ -350,4 +374,69 @@ footer.foot .wrap { text-align: center; padding-top: var(--s-xl); padding-bottom
 /* ===== Tablet/desktop: mais respiro ===== */
 @media (min-width: 736px) {
   .wrap { padding-top: var(--s-xl); padding-bottom: var(--s-xl); }
+}
+
+/* ============================================================
+   Modal genérico (usado hoje pelo fluxo de saves do Pokémon)
+   Desktop: cartão centralizado. Mobile: folha que sobe do rodapé —
+   mesmo <dialog>, só o CSS muda de acordo com a largura da tela.
+   ============================================================ */
+.pokemon-modal {
+  position: fixed; inset: 0; margin: 0; padding: var(--s-md);
+  width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+  background: transparent; border: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.pokemon-modal:not([open]) { display: none; }
+.pokemon-modal::backdrop { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+
+.modal-card {
+  background: var(--surface); border-radius: var(--r-lg);
+  width: min(440px, 100%); max-height: 85vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--product-shadow);
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm);
+  padding: var(--s-md); border-bottom: 1px solid var(--hairline); flex: none;
+}
+.modal-header h2 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.374px; }
+.modal-body { padding: var(--s-md); overflow-y: auto; }
+
+.modal-game-list { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.modal-game-row {
+  display: flex; align-items: center; gap: var(--s-sm);
+  padding: 8px; border-radius: var(--r-md); border: 1px solid transparent;
+  background: transparent; color: var(--ink); font: inherit; font-size: 15px;
+  text-align: left; cursor: pointer;
+}
+.modal-game-row:hover { background: var(--surface-2); border-color: var(--hairline); }
+.modal-game-row img { width: 40px; height: 40px; object-fit: contain; flex: none; background: var(--surface-2); border-radius: var(--r-sm); }
+
+.modal-game-label { margin: 0 0 var(--s-md); }
+.modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s-md); }
+.modal-field span { font-size: 13px; color: var(--muted); }
+.modal-field input {
+  padding: 10px 12px; font: inherit; font-size: 16px;
+  color: var(--ink); background: var(--surface-2);
+  border: 1px solid var(--hairline); border-radius: var(--r-md);
+}
+.modal-field input:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm); margin-top: var(--s-lg); }
+
+@media (max-width: 640px) {
+  .pokemon-modal { align-items: flex-end; padding: 0; }
+  .modal-card {
+    width: 100%; max-width: 100%; max-height: 88vh;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: pokemon-sheet-up 0.22s ease;
+  }
+  @keyframes pokemon-sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-card { animation: none; }
 }

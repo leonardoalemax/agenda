@@ -60,6 +60,9 @@ const platforms = platformsForGame(genName, game);
       <button class="icon-btn moved-home-btn" type="button" data-moved-home title="Movido pro HOME" aria-label="Movido pro HOME">
         <Icon name="house" size={20} />
       </button>
+      <button class="icon-btn completed-btn" type="button" data-completed title="Completado" aria-label="Completado">
+        <Icon name="monitor-check" size={20} />
+      </button>
       <div class="active-save-actions">
         <button class="icon-btn" type="button" data-rename-active title="Renomear" aria-label="Renomear">✎</button>
         <button class="icon-btn" type="button" data-delete-active title="Apagar" aria-label="Apagar">🗑</button>
@@ -163,6 +166,12 @@ const platforms = platformsForGame(genName, game);
   }
   .moved-home-btn[aria-pressed="true"] {
     color: #f59e0b;
+  }
+  .completed-btn {
+    color: var(--muted); transition: color .15s ease;
+  }
+  .completed-btn[aria-pressed="true"] {
+    color: #10b981;
   }
   .active-save-actions { display: flex; gap: var(--s-sm); }
 

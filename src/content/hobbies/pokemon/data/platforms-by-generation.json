@@ -1,0 +1,496 @@
+{
+	"generation-i": [
+		{
+			"game": "red",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "blue",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "yellow",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "red-japan",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "green-japan",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "blue-japan",
+			"platforms": [
+				{
+					"platform": "Game Boy",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		}
+	],
+	"generation-ii": [
+		{
+			"game": "gold",
+			"platforms": [
+				{
+					"platform": "Game Boy Color",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "silver",
+			"platforms": [
+				{
+					"platform": "Game Boy Color",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "crystal",
+			"platforms": [
+				{
+					"platform": "Game Boy Color",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Virtual Console (3DS)",
+					"media": ["digital"]
+				}
+			]
+		}
+	],
+	"generation-iii": [
+		{
+			"game": "ruby",
+			"platforms": [
+				{
+					"platform": "Game Boy Advance",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "sapphire",
+			"platforms": [
+				{
+					"platform": "Game Boy Advance",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "emerald",
+			"platforms": [
+				{
+					"platform": "Game Boy Advance",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "firered",
+			"platforms": [
+				{
+					"platform": "Game Boy Advance",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "leafgreen",
+			"platforms": [
+				{
+					"platform": "Game Boy Advance",
+					"media": ["physical"]
+				},
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "colosseum",
+			"platforms": [
+				{
+					"platform": "GameCube",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "xd",
+			"platforms": [
+				{
+					"platform": "GameCube",
+					"media": ["physical"]
+				}
+			]
+		}
+	],
+	"generation-iv": [
+		{
+			"game": "diamond",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "pearl",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "platinum",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "heartgold",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "soulsilver",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		}
+	],
+	"generation-v": [
+		{
+			"game": "black",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "white",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "black-2",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		},
+		{
+			"game": "white-2",
+			"platforms": [
+				{
+					"platform": "Nintendo DS",
+					"media": ["physical"]
+				}
+			]
+		}
+	],
+	"generation-vi": [
+		{
+			"game": "x",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "y",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "omega-ruby",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "alpha-sapphire",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		}
+	],
+	"generation-vii": [
+		{
+			"game": "sun",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "moon",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "ultra-sun",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "ultra-moon",
+			"platforms": [
+				{
+					"platform": "Nintendo 3DS",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "lets-go-pikachu",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "lets-go-eevee",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		}
+	],
+	"generation-viii": [
+		{
+			"game": "sword",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "shield",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "the-isle-of-armor",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "the-crown-tundra",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "brilliant-diamond",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "shining-pearl",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "legends-arceus",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		}
+	],
+	"generation-ix": [
+		{
+			"game": "scarlet",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "violet",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "the-teal-mask",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "the-indigo-disk",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		},
+		{
+			"game": "legends-za",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital", "physical"]
+				}
+			]
+		},
+		{
+			"game": "mega-dimension",
+			"platforms": [
+				{
+					"platform": "Nintendo Switch",
+					"media": ["digital"]
+				}
+			]
+		}
+	]
+}

@@ -50,8 +50,14 @@ export default defineConfig({
 			},
 			workbox: {
 				// MPA: sem navigateFallback. Cada página tem HTML próprio no precache,
-				// então navegação offline resolve pelo precache (senão o SW serviria
-				// sempre o index para qualquer rota).
+				// então a navegação offline resolve pelo precache — com fallback, o SW
+				// serviria o index para QUALQUER rota (/hobbies/pokemon vira a home).
+				//
+				// Tem que declarar a chave: @vite-pwa/astro faz
+				//   if (!("navigateFallback" in workbox)) workbox.navigateFallback = base
+				// ou seja, omitir a opção reativa o default. `undefined` mantém a chave
+				// presente e desliga de verdade.
+				navigateFallback: undefined,
 				globPatterns: [
 					"**/*.{js,css,html,svg,png,jpg,jpeg,webp,gif,ico,txt,woff,woff2,json}",
 				],

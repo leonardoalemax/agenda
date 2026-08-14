@@ -86,6 +86,34 @@ function updateTotals(root: HTMLElement) {
   }
 }
 
+// Lê o estado salvo (IndexedDB) e joga na tela. Chamado na carga e de novo
+// quando chega mudança de outro dispositivo pelo sync.
+async function hydrate(root: HTMLElement) {
+  const boxes = Array.from(root.querySelectorAll<HTMLInputElement>('input[data-bought]'));
+  await Promise.all(
+    boxes.map(async (box) => {
+      const card = box.closest<HTMLElement>('[data-kit]');
+      const v = await getCheck(`gunpla-bought::${box.getAttribute('data-bought') || ''}`);
+      box.checked = Boolean(v);
+      card?.classList.toggle('bought', box.checked);
+    }),
+  );
+
+  const inputs = Array.from(root.querySelectorAll<HTMLInputElement>('input[data-paid]'));
+  await Promise.all(
+    inputs.map(async (input) => {
+      const card = input.closest<HTMLElement>('[data-kit]');
+      // não pisa no que o usuário está digitando agora
+      if (document.activeElement === input) return;
+      const v = await getPrice(`gunpla-paid::${input.getAttribute('data-paid') || ''}`);
+      input.value = typeof v === 'number' && v > 0 ? String(v) : '';
+      if (card) renderCardDiff(card);
+    }),
+  );
+
+  updateTotals(root);
+}
+
 export function initGunplaWishlist() {
   const root = document.querySelector<HTMLElement>('[data-wishlist]');
   if (!root) return;
@@ -93,16 +121,7 @@ export function initGunplaWishlist() {
   // toggle "comprado"
   root.querySelectorAll<HTMLInputElement>('input[data-bought]').forEach((box) => {
     const card = box.closest<HTMLElement>('[data-kit]');
-    const slug = box.getAttribute('data-bought') || '';
-    const key = `gunpla-bought::${slug}`;
-
-    getCheck(key).then((v) => {
-      if (v) {
-        box.checked = true;
-        card?.classList.add('bought');
-        updateTotals(root);
-      }
-    });
+    const key = `gunpla-bought::${box.getAttribute('data-bought') || ''}`;
 
     box.addEventListener('change', () => {
       card?.classList.toggle('bought', box.checked);
@@ -114,16 +133,7 @@ export function initGunplaWishlist() {
   // preço pago (R$)
   root.querySelectorAll<HTMLInputElement>('input[data-paid]').forEach((input) => {
     const card = input.closest<HTMLElement>('[data-kit]');
-    const slug = input.getAttribute('data-paid') || '';
-    const key = `gunpla-paid::${slug}`;
-
-    getPrice(key).then((v) => {
-      if (typeof v === 'number' && v > 0) {
-        input.value = String(v);
-        if (card) renderCardDiff(card);
-        updateTotals(root);
-      }
-    });
+    const key = `gunpla-paid::${input.getAttribute('data-paid') || ''}`;
 
     input.addEventListener('input', () => {
       const paid = parseFloat(input.value.replace(',', '.'));
@@ -134,5 +144,6 @@ export function initGunplaWishlist() {
     });
   });
 
-  updateTotals(root);
+  hydrate(root);
+  window.addEventListener('agenda:remote-sync', () => hydrate(root));
 }

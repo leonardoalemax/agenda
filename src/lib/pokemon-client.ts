@@ -292,6 +292,7 @@ export function initPokemonSavePage() {
   const trainerIdEl = document.querySelector<HTMLElement>('[data-trainer-id]');
   const trainerPlatformEl = document.querySelector<HTMLElement>('[data-trainer-platform]');
   const movedHomeBtn = document.querySelector<HTMLButtonElement>('[data-moved-home]');
+  const completedBtn = document.querySelector<HTMLButtonElement>('[data-completed]');
   const monButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-caught]'));
   const bar = document.querySelector<HTMLElement>('[data-progress-bar]');
   const track = document.querySelector<HTMLElement>('[data-progress-track]');
@@ -375,6 +376,7 @@ export function initPokemonSavePage() {
     if (trainerIdEl) trainerIdEl.textContent = activeSave.trainerId;
     if (trainerPlatformEl) trainerPlatformEl.textContent = activeSave.platform ? ` · ${activeSave.platform}` : '';
     if (movedHomeBtn) movedHomeBtn.setAttribute('aria-pressed', String(Boolean(activeSave.movedToHome)));
+    if (completedBtn) completedBtn.setAttribute('aria-pressed', String(Boolean(activeSave.completed)));
     if (trainerLine) trainerLine.hidden = false;
     if (dexWrap) dexWrap.hidden = false;
     if (noSaveMsg) noSaveMsg.hidden = true;
@@ -405,6 +407,13 @@ export function initPokemonSavePage() {
     activeSave.movedToHome = !activeSave.movedToHome;
     movedHomeBtn.setAttribute('aria-pressed', String(activeSave.movedToHome));
     setSaveMovedToHome(activeSave.trainerId, activeSave.movedToHome);
+  });
+
+  completedBtn?.addEventListener('click', () => {
+    if (!activeSave) return;
+    activeSave.completed = !activeSave.completed;
+    completedBtn.setAttribute('aria-pressed', String(activeSave.completed));
+    setSaveCompleted(activeSave.trainerId, activeSave.completed);
   });
 
   document.querySelector('[data-delete-active]')?.addEventListener('click', async () => {
@@ -502,6 +511,7 @@ export function initPokemonSavesOverview() {
               <span class="trainer-id">@${escapeHtml(s.trainerId)}</span>
             </div>
             ${s.movedToHome ? '<span class="home-icon" title="Movido pro HOME" aria-label="Movido pro HOME"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>' : ''}
+            ${s.completed ? '<span class="completed-icon" title="Completado" aria-label="Completado"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v4M4 9h16M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><polyline points="9 12 12 15 16 11"/></svg></span>' : ''}
             <div class="save-card-progress">
               <div class="progress"><span style="width:${pct}%"></span></div>
               <span class="hint">${n}/${meta.total} — ${pct}%</span>

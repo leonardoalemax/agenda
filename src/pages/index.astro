@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Backup from '../components/Backup.astro';
+import SyncPanel from '../components/SyncPanel.astro';
 import { withBase } from '../lib/base';
 
 const entries = await getCollection('agenda');
@@ -33,6 +34,7 @@ const fmt = (d?: Date) =>
     {entries.length} {entries.length === 1 ? 'página' : 'páginas'} · escreva Markdown em <code>src/content/</code> e dê push.
   </p>
 
+  <SyncPanel />
   <Backup />
 
   <h2 class="section-title">Áreas</h2>
@@ -42,6 +44,13 @@ const fmt = (d?: Date) =>
       <span>
         <span class="a-title">Gunpla</span>
         <small>Wishlist de kits</small>
+      </span>
+    </a>
+    <a class="area-card" href={withBase('hobbies/pokemon')}>
+      <span class="emoji">🔴</span>
+      <span>
+        <span class="a-title">Pokémon</span>
+        <small>Jogos que tenho + saves com pokédex</small>
       </span>
     </a>
   </div>

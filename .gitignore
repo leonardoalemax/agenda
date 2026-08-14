@@ -9,6 +9,11 @@ dist/
 public/icons/*.png
 dev-dist/
 
+# env (chaves do Supabase) — .env.local.example fica versionado
+.env
+.env.local
+.env.*.local
+
 # sistema
 .DS_Store
 *.log

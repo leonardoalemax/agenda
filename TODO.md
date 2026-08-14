@@ -1,0 +1,6 @@
+- adicionar ao compo save a plataforma do mesmo e um checkbox pra informar se o mesmo esta no jogo ou transferido pro home.
+- criar view do home.
+- ajustar header do save.
+- filtro por numero e nome de pokemon no save.
+- na lista de jogos mostrar de alguma forma caso eu ja tenha completado a dex do mesmo.
+- mostrar tambem os retroarchivments dos jogos na lista de jogos de pokemon.

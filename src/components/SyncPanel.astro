@@ -1,0 +1,124 @@
+---
+// Painel de sync: cola o token do GitHub uma vez por aparelho.
+// O token fica só no IndexedDB deste dispositivo — nunca vai pro build.
+---
+<section class="sync">
+  <div class="sync-head">
+    <span class="dot" data-sync-dot></span>
+    <strong>Sync</strong>
+    <span class="hint" data-sync-msg>carregando…</span>
+    <span class="grow"></span>
+    <button class="btn" data-sync-now hidden>Sincronizar</button>
+    <button class="btn" data-sync-toggle>Configurar</button>
+  </div>
+
+  <div class="sync-form" data-sync-form hidden>
+    <p class="hint">
+      Cole um token do GitHub com escopo <code>gist</code> — o mesmo nos dois aparelhos.
+      Seus dados vão pra um gist privado; o mais recente vence.
+      <a
+        href="https://github.com/settings/tokens/new?scopes=gist&description=Minha%20Agenda"
+        target="_blank"
+        rel="noopener noreferrer">criar token →</a>
+    </p>
+    <div class="sync-row">
+      <input
+        type="password"
+        data-token
+        placeholder="ghp_…"
+        autocomplete="off"
+        spellcheck="false" />
+      <button class="btn primary" data-save>Salvar</button>
+      <button class="btn danger" data-forget hidden>Esquecer</button>
+    </div>
+    <span class="hint" data-form-msg></span>
+  </div>
+</section>
+
+<script>
+  import { getToken, saveToken, clearToken, syncNow, currentStatus, SYNC_STATUS_EVENT } from '../lib/gist-sync';
+  import type { SyncStatus } from '../lib/gist-sync';
+
+  const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+
+  const dot = $('[data-sync-dot]');
+  const msg = $('[data-sync-msg]');
+  const form = $('[data-sync-form]');
+  const input = $<HTMLInputElement>('[data-token]');
+  const btnToggle = $('[data-sync-toggle]');
+  const btnNow = $<HTMLButtonElement>('[data-sync-now]');
+  const btnForget = $('[data-forget]');
+  const formMsg = $('[data-form-msg]');
+
+  function render(s: SyncStatus) {
+    dot.className = `dot ${s.state}`;
+    msg.textContent = s.message;
+  }
+
+  async function refreshConfigured() {
+    const has = Boolean(await getToken());
+    btnNow.hidden = !has;
+    btnForget.hidden = !has;
+    input.placeholder = has ? '•••••••• (token salvo neste aparelho)' : 'ghp_…';
+  }
+
+  window.addEventListener(SYNC_STATUS_EVENT, (e) => render((e as CustomEvent<SyncStatus>).detail));
+  render(currentStatus());
+  refreshConfigured();
+
+  btnToggle.addEventListener('click', () => {
+    form.hidden = !form.hidden;
+  });
+
+  btnNow.addEventListener('click', () => syncNow());
+
+  $('[data-save]').addEventListener('click', async () => {
+    formMsg.textContent = 'validando…';
+    const err = await saveToken(input.value);
+    if (err) {
+      formMsg.textContent = `✗ ${err}`;
+      return;
+    }
+    input.value = '';
+    formMsg.textContent = '✓ token salvo';
+    await refreshConfigured();
+    await syncNow();
+  });
+
+  btnForget.addEventListener('click', async () => {
+    await clearToken();
+    input.value = '';
+    formMsg.textContent = 'token removido deste aparelho';
+    await refreshConfigured();
+  });
+</script>
+
+<style>
+  .sync {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    margin: 0 0 1.25rem;
+    background: var(--surface);
+  }
+  .sync-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .grow { flex: 1; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted); flex: none;
+  }
+  .dot.ok { background: #34c759; }
+  .dot.syncing { background: #ff9f0a; }
+  .dot.error { background: #ff3b30; }
+  .sync-form { margin-top: var(--s-md); border-top: 1px solid var(--hairline); padding-top: var(--s-md); }
+  .sync-form p { margin: 0 0 var(--s-sm); }
+  .sync-row { display: flex; gap: var(--s-sm); flex-wrap: wrap; }
+  .sync-row input {
+    flex: 1; min-width: 200px;
+    padding: 9px 12px; font: inherit; font-size: 16px; /* 16px evita zoom no iOS */
+    color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--hairline); border-radius: var(--r-md);
+  }
+  .sync-row input:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 1px; }
+  .btn.danger { color: #ff3b30; }
+</style>

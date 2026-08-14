@@ -17,18 +17,21 @@
    funcionar offline (inclusive imagens) tem que entrar no `globPatterns` do
    Workbox em `astro.config.mjs`.
 
-3. **Dados do cliente em IndexedDB local.** Todo estado que o usuário altera no
-   app (checks de checklist, "comprado" de gunpla, notas, etc.) é salvo
-   **localmente em IndexedDB** através de `src/lib/store.ts`. **Sem backend** e
-   **sem sync automático entre dispositivos**. A portabilidade é via
-   **export/import de JSON** (backup). Não introduzir servidor/DB remoto sem
-   antes mudar esta diretriz.
+3. **Dados em IndexedDB local; sync opcional por Gist.** Todo estado que o
+   usuário altera (checks, preços pagos, notas) é salvo **localmente em
+   IndexedDB** via `src/lib/store.ts` — **offline funciona 100%, sempre**.
+   Havendo token configurado, `src/lib/gist-sync.ts` espelha o snapshot inteiro
+   num **gist privado do GitHub**, com regra **"o mais novo vence"** (sem merge
+   por chave). **Sem backend próprio.** O token é colado pelo usuário no app e
+   fica no aparelho — **nunca no build, nunca no repositório**. Não introduzir
+   servidor/DB remoto sem antes mudar esta diretriz.
 
 ## Onde estão os detalhes
 
 - [`docs/diretrizes/arquitetura.md`](docs/diretrizes/arquitetura.md) — stack, build, deploy, PWA.
-- [`docs/diretrizes/dados-e-sync.md`](docs/diretrizes/dados-e-sync.md) — IndexedDB, chaves, backup.
+- [`docs/diretrizes/dados-e-sync.md`](docs/diretrizes/dados-e-sync.md) — IndexedDB, sync por gist.
 - [`docs/diretrizes/conteudo.md`](docs/diretrizes/conteudo.md) — como escrever md, tipos, coleções.
+- [`docs/SYNC.md`](docs/SYNC.md) — como ligar o sync entre iPad e iPhone.
 
 ## Antes de mudar algo estrutural
 

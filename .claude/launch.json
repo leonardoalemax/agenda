@@ -2,10 +2,11 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "agenda-preview",
+      "name": "agenda-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview"],
-      "port": 4321
+      "runtimeArgs": ["run", "dev"],
+      "port": 4321,
+      "autoPort": true
     }
   ]
 }

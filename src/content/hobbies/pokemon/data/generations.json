@@ -1,0 +1,366 @@
+[
+  {
+    "id": 1,
+    "name": "generation-i",
+    "region": "kanto",
+    "limit": 151,
+    "games": [
+      {
+        "slug": "red",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "blue",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "yellow",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "red-japan",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "green-japan",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "blue-japan",
+        "pokedexes": [
+          "kanto"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "generation-ii",
+    "region": "johto",
+    "limit": 100,
+    "games": [
+      {
+        "slug": "gold",
+        "pokedexes": [
+          "original-johto"
+        ]
+      },
+      {
+        "slug": "silver",
+        "pokedexes": [
+          "original-johto"
+        ]
+      },
+      {
+        "slug": "crystal",
+        "pokedexes": [
+          "original-johto"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "generation-iii",
+    "region": "hoenn",
+    "limit": 135,
+    "games": [
+      {
+        "slug": "ruby",
+        "pokedexes": [
+          "hoenn"
+        ]
+      },
+      {
+        "slug": "sapphire",
+        "pokedexes": [
+          "hoenn"
+        ]
+      },
+      {
+        "slug": "emerald",
+        "pokedexes": [
+          "hoenn"
+        ]
+      },
+      {
+        "slug": "firered",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "leafgreen",
+        "pokedexes": [
+          "kanto"
+        ]
+      },
+      {
+        "slug": "colosseum",
+        "pokedexes": [
+          "national"
+        ]
+      },
+      {
+        "slug": "xd",
+        "pokedexes": [
+          "national"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "generation-iv",
+    "region": "sinnoh",
+    "limit": 107,
+    "games": [
+      {
+        "slug": "diamond",
+        "pokedexes": [
+          "original-sinnoh"
+        ]
+      },
+      {
+        "slug": "pearl",
+        "pokedexes": [
+          "original-sinnoh"
+        ]
+      },
+      {
+        "slug": "platinum",
+        "pokedexes": [
+          "extended-sinnoh"
+        ]
+      },
+      {
+        "slug": "heartgold",
+        "pokedexes": [
+          "updated-johto"
+        ]
+      },
+      {
+        "slug": "soulsilver",
+        "pokedexes": [
+          "updated-johto"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "generation-v",
+    "region": "unova",
+    "limit": 156,
+    "games": [
+      {
+        "slug": "black",
+        "pokedexes": [
+          "original-unova"
+        ]
+      },
+      {
+        "slug": "white",
+        "pokedexes": [
+          "original-unova"
+        ]
+      },
+      {
+        "slug": "black-2",
+        "pokedexes": [
+          "updated-unova"
+        ]
+      },
+      {
+        "slug": "white-2",
+        "pokedexes": [
+          "updated-unova"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "generation-vi",
+    "region": "kalos",
+    "limit": 72,
+    "games": [
+      {
+        "slug": "x",
+        "pokedexes": [
+          "kalos-central",
+          "kalos-coastal",
+          "kalos-mountain"
+        ]
+      },
+      {
+        "slug": "y",
+        "pokedexes": [
+          "kalos-central",
+          "kalos-coastal",
+          "kalos-mountain"
+        ]
+      },
+      {
+        "slug": "omega-ruby",
+        "pokedexes": [
+          "updated-hoenn"
+        ]
+      },
+      {
+        "slug": "alpha-sapphire",
+        "pokedexes": [
+          "updated-hoenn"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "generation-vii",
+    "region": "alola",
+    "limit": 88,
+    "games": [
+      {
+        "slug": "sun",
+        "pokedexes": [
+          "original-alola"
+        ]
+      },
+      {
+        "slug": "moon",
+        "pokedexes": [
+          "original-alola"
+        ]
+      },
+      {
+        "slug": "ultra-sun",
+        "pokedexes": [
+          "updated-alola"
+        ]
+      },
+      {
+        "slug": "ultra-moon",
+        "pokedexes": [
+          "updated-alola"
+        ]
+      },
+      {
+        "slug": "lets-go-pikachu",
+        "pokedexes": [
+          "letsgo-kanto"
+        ]
+      },
+      {
+        "slug": "lets-go-eevee",
+        "pokedexes": [
+          "letsgo-kanto"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "generation-viii",
+    "region": "galar",
+    "limit": 96,
+    "games": [
+      {
+        "slug": "sword",
+        "pokedexes": [
+          "galar"
+        ]
+      },
+      {
+        "slug": "shield",
+        "pokedexes": [
+          "galar"
+        ]
+      },
+      {
+        "slug": "the-isle-of-armor",
+        "pokedexes": [
+          "isle-of-armor"
+        ]
+      },
+      {
+        "slug": "the-crown-tundra",
+        "pokedexes": [
+          "crown-tundra"
+        ]
+      },
+      {
+        "slug": "brilliant-diamond",
+        "pokedexes": [
+          "original-sinnoh"
+        ]
+      },
+      {
+        "slug": "shining-pearl",
+        "pokedexes": [
+          "original-sinnoh"
+        ]
+      },
+      {
+        "slug": "legends-arceus",
+        "pokedexes": [
+          "hisui"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "generation-ix",
+    "region": "paldea",
+    "limit": 120,
+    "games": [
+      {
+        "slug": "scarlet",
+        "pokedexes": [
+          "paldea"
+        ]
+      },
+      {
+        "slug": "violet",
+        "pokedexes": [
+          "paldea"
+        ]
+      },
+      {
+        "slug": "the-teal-mask",
+        "pokedexes": [
+          "kitakami"
+        ]
+      },
+      {
+        "slug": "the-indigo-disk",
+        "pokedexes": [
+          "blueberry"
+        ]
+      },
+      {
+        "slug": "legends-za",
+        "pokedexes": [
+          "lumiose-city"
+        ]
+      },
+      {
+        "slug": "mega-dimension",
+        "pokedexes": [
+          "hyperspace"
+        ]
+      }
+    ]
+  }
+]

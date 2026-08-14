@@ -107,17 +107,30 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
             const names = await caches.keys();
             await Promise.all(names.map((n) => caches.delete(n)));
           }
-          // Limpa IndexedDB completamente
+          // Limpa dados de usuário mas preserva token do gist
           if ('indexedDB' in window) {
-            await Promise.all(
-              Array.from(await indexedDB.databases()).map(
-                (db) => new Promise<void>((resolve) => {
-                  const req = indexedDB.deleteDatabase(db.name);
-                  req.onsuccess = () => resolve();
-                  req.onerror = () => resolve(); // ignora erros
-                })
-              )
-            );
+            await new Promise<void>((resolve) => {
+              const req = indexedDB.open('minha-agenda');
+              req.onsuccess = () => {
+                try {
+                  const db = req.result;
+                  const tx = db.transaction(['checks', 'notes', 'prices', 'pokemonSaves'], 'readwrite');
+                  // Limpa stores de dados (checks, notes, prices, pokemonSaves)
+                  // mas deixa 'meta' intacto (contém gh-token e gist-id)
+                  tx.objectStore('checks').clear();
+                  tx.objectStore('notes').clear();
+                  tx.objectStore('prices').clear();
+                  tx.objectStore('pokemonSaves').clear();
+                  tx.oncomplete = () => {
+                    db.close();
+                    resolve();
+                  };
+                } catch {
+                  resolve();
+                }
+              };
+              req.onerror = () => resolve();
+            });
           }
         } catch {
           // segue pro reload mesmo se algo falhar aqui — melhor recarregar

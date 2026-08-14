@@ -237,6 +237,11 @@ const platforms = platformsForGame(genName, game);
   .dex-infinite-list .mon-btn {
     display: flex; align-items: center; gap: var(--s-sm);
     padding: 5px var(--s-sm); text-align: left;
+    background: transparent !important;
+  }
+  .dex-icon-list .mon-btn:hover,
+  .dex-infinite-list .mon-btn:hover {
+    background: transparent !important;
   }
   .dex-icon-list .mon + .mon,
   .dex-infinite-list .mon + .mon { border-top: 1px solid var(--hairline); }
@@ -244,16 +249,6 @@ const platforms = platformsForGame(genName, game);
   .dex-infinite-list .mon img { width: 40px; height: 40px; }
   .dex-icon-list .mon-name,
   .dex-infinite-list .mon-name { flex: 1; font-size: 15px; }
-
-  /* Remove background para layouts de lista (1 coluna) */
-  .dex-icon-list .mon-btn,
-  .dex-infinite-list .mon-btn {
-    background: transparent;
-  }
-  .dex-icon-list .mon-btn:hover,
-  .dex-infinite-list .mon-btn:hover {
-    background: transparent;
-  }
 
   /* Botão sem chrome de botão: só a área clicável em volta do sprite.
      Marcar/desmarcar é o próprio clique — a cor do sprite já denota o

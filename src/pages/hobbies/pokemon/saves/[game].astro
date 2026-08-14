@@ -245,6 +245,16 @@ const platforms = platformsForGame(genName, game);
   .dex-icon-list .mon-name,
   .dex-infinite-list .mon-name { flex: 1; font-size: 15px; }
 
+  /* Remove background para layouts de lista (1 coluna) */
+  .dex-icon-list .mon-btn,
+  .dex-infinite-list .mon-btn {
+    background: transparent;
+  }
+  .dex-icon-list .mon-btn:hover,
+  .dex-infinite-list .mon-btn:hover {
+    background: transparent;
+  }
+
   /* Botão sem chrome de botão: só a área clicável em volta do sprite.
      Marcar/desmarcar é o próprio clique — a cor do sprite já denota o
      estado, sem precisar de checkbox. */

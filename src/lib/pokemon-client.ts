@@ -291,7 +291,7 @@ export function initPokemonSavePage() {
   const trainerNameEl = document.querySelector<HTMLElement>('[data-trainer-name]');
   const trainerIdEl = document.querySelector<HTMLElement>('[data-trainer-id]');
   const trainerPlatformEl = document.querySelector<HTMLElement>('[data-trainer-platform]');
-  const movedHomeCheckbox = document.querySelector<HTMLInputElement>('[data-moved-home]');
+  const movedHomeBtn = document.querySelector<HTMLButtonElement>('[data-moved-home]');
   const monButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-caught]'));
   const bar = document.querySelector<HTMLElement>('[data-progress-bar]');
   const track = document.querySelector<HTMLElement>('[data-progress-track]');
@@ -374,7 +374,7 @@ export function initPokemonSavePage() {
     if (trainerNameEl) trainerNameEl.textContent = activeSave.trainerName || '(sem nome)';
     if (trainerIdEl) trainerIdEl.textContent = activeSave.trainerId;
     if (trainerPlatformEl) trainerPlatformEl.textContent = activeSave.platform ? ` · ${activeSave.platform}` : '';
-    if (movedHomeCheckbox) movedHomeCheckbox.checked = Boolean(activeSave.movedToHome);
+    if (movedHomeBtn) movedHomeBtn.setAttribute('aria-pressed', String(Boolean(activeSave.movedToHome)));
     if (trainerLine) trainerLine.hidden = false;
     if (dexWrap) dexWrap.hidden = false;
     if (noSaveMsg) noSaveMsg.hidden = true;
@@ -400,10 +400,11 @@ export function initPokemonSavePage() {
     });
   });
 
-  movedHomeCheckbox?.addEventListener('change', () => {
+  movedHomeBtn?.addEventListener('click', () => {
     if (!activeSave) return;
-    activeSave.movedToHome = movedHomeCheckbox.checked;
-    setSaveMovedToHome(activeSave.trainerId, movedHomeCheckbox.checked);
+    activeSave.movedToHome = !activeSave.movedToHome;
+    movedHomeBtn.setAttribute('aria-pressed', String(activeSave.movedToHome));
+    setSaveMovedToHome(activeSave.trainerId, activeSave.movedToHome);
   });
 
   document.querySelector('[data-delete-active]')?.addEventListener('click', async () => {

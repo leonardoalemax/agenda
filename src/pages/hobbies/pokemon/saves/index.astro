@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../../lib/base';
+import { allGenerations, generationLabel, gameName, dexForGame, coverPath, platformsForGame } from '../../../../lib/pokemon';
+
+const gens = allGenerations();
+
+// Mapa game -> metadados, pro client montar o form e calcular progresso sem
+// reimportar os JSONs de dados no bundle da página.
+const gameIndex = Object.fromEntries(
+  gens.flatMap((gen) =>
+    gen.games.map((g) => [
+      g.slug,
+      {
+        name: gameName(g.slug),
+        generation: generationLabel(gen),
+        total: dexForGame(gen.name, g.slug).length,
+        cover: coverPath(g.slug),
+        platforms: platformsForGame(gen.name, g.slug),
+      },
+    ]),
+  ),
+);
+---
+
+<BaseLayout title="Pokémon · Saves" description="Meus saves de Pokémon — um por treinador, com pokédex própria.">
+  <a class="back" href={withBase('hobbies/pokemon')}>← jogos</a>
+
+  <header class="doc-header">
+    <span class="badge pokemon">pokémon</span>
+    <h1>Saves</h1>
+    <p class="hint" style="margin:.2rem 0 0;">
+      Cada save é uma jogada: treinador + jogo + pokédex própria. Dá pra ter mais de um save do mesmo jogo.
+    </p>
+  </header>
+
+  <nav class="subnav">
+    <a class="subnav-item" href={withBase('hobbies/pokemon')}>Jogos</a>
+    <span class="subnav-item active">Saves</span>
+    <a class="subnav-item" href={withBase('hobbies/pokemon/home')}>HOME</a>
+  </nav>
+
+  <div class="new-save-row">
+    <select class="game-filter" data-game-filter aria-label="Filtrar por jogo">
+      <option value="">Todos os jogos</option>
+      {gens.map((gen) => (
+        <optgroup label={generationLabel(gen)}>
+          {gen.games.map((g) => <option value={g.slug}>{gameName(g.slug)}</option>)}
+        </optgroup>
+      ))}
+    </select>
+    <button class="btn primary" type="button" data-new-save-btn>+ Novo save</button>
+  </div>
+
+  <div class="saves-list" data-saves-overview></div>
+
+  <script define:vars={{ gameIndexJson: JSON.stringify(gameIndex) }}>
+    window.__pokemonGameIndex = JSON.parse(gameIndexJson);
+  </script>
+  <script>
+    import { initPokemonSavesOverview } from '../../../../lib/pokemon-client';
+    initPokemonSavesOverview();
+  </script>
+</BaseLayout>
+
+<style>
+  .subnav { display: flex; gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
+  .subnav-item {
+    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
+    color: var(--muted); border: 1px solid var(--hairline);
+  }
+  .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
+  .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+
+  .new-save-row { display: flex; gap: var(--s-sm); flex-wrap: wrap; margin-bottom: var(--s-lg); }
+  .game-filter {
+    flex: 1; min-width: 180px; padding: 9px 12px; font: inherit; font-size: 16px;
+    color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--hairline); border-radius: var(--r-md);
+  }
+
+  .saves-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+  :global(.save-card) {
+    display: flex; align-items: center; gap: var(--s-md);
+    border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    background: var(--surface); padding: var(--s-sm) var(--s-md);
+  }
+  :global(.save-card:hover) { border-color: var(--accent); text-decoration: none; }
+  :global(.save-cover) {
+    width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
+    border-radius: var(--r-sm); display: block; flex: none;
+  }
+  :global(.save-card-info) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  :global(.save-card-info strong) {
+    font-size: 15px; letter-spacing: -0.32px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  :global(.save-card-info .hint) {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  :global(.trainer-id) { font-size: 12px; color: var(--muted); font-family: monospace; }
+  :global(.home-badge) {
+    flex: none; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: var(--r-pill); padding: 3px 8px;
+  }
+  :global(.save-card-progress) { flex: none; width: 84px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  :global(.save-card .progress) {
+    width: 100%; height: 6px; background: var(--surface-2); border-radius: var(--r-pill); overflow: hidden;
+  }
+  :global(.save-card .progress span) { display: block; height: 100%; background: var(--accent); }
+  :global(.save-card-progress .hint) { font-size: 12px; white-space: nowrap; }
+  :global(.save-card-arrow) { flex: none; color: var(--muted); font-size: 18px; }
+
+  @media (max-width: 480px) {
+    :global(.save-card-progress) { width: 48px; }
+  }
+</style>

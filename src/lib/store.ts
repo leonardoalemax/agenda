@@ -178,6 +178,8 @@ export interface PokemonSave {
   movedToHome?: boolean;
   /** Se este save já foi completado (100% pokédex). */
   completed?: boolean;
+  /** Horas jogadas neste save, pra usar depois numa tela de status. */
+  hoursSpent?: number;
   createdAt: number;
 }
 
@@ -197,12 +199,14 @@ export async function createSave(
   trainerName?: string,
   trainerId?: string,
   platform?: string,
+  hoursSpent?: number,
 ): Promise<PokemonSave> {
   const save: PokemonSave = {
     trainerId: trainerId || crypto.randomUUID(),
     game,
     trainerName,
     platform,
+    hoursSpent,
     createdAt: Date.now(),
   };
   await (await db()).put('pokemonSaves', save);
@@ -210,11 +214,16 @@ export async function createSave(
   return save;
 }
 
-export async function renameSave(trainerId: string, trainerName?: string, platform?: string): Promise<void> {
+export async function renameSave(
+  trainerId: string,
+  trainerName?: string,
+  platform?: string,
+  hoursSpent?: number,
+): Promise<void> {
   const d = await db();
   const save = await d.get('pokemonSaves', trainerId);
   if (!save) return;
-  await d.put('pokemonSaves', { ...save, trainerName, platform });
+  await d.put('pokemonSaves', { ...save, trainerName, platform, hoursSpent });
   await touch();
 }
 

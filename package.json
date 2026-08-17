@@ -17,7 +17,8 @@
   "dependencies": {
     "astro": "^5.2.0",
     "idb": "^8.0.0",
-    "lucide": "^1.31.0"
+    "lucide": "^1.31.0",
+    "lucide-react": "^1.31.0"
   },
   "devDependencies": {
     "@vite-pwa/astro": "^0.5.0",

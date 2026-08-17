@@ -23,11 +23,21 @@ import { withBase } from './base';
 
 const CAUGHT_PREFIX = 'pokemon-caught::';
 
+/** Disparado depois que hydrateCompleted() (tela de jogos) termina de ler o IndexedDB. */
+const POKEMON_COMPLETED_HYDRATED_EVENT = 'pokemon:completed-hydrated';
+
 function escapeHtml(s: string): string {
   return s.replace(
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
   );
+}
+
+/** " · 24h" (ou "12,5h"), ou string vazia se o save não tem horas registradas. */
+function hoursLabel(hoursSpent?: number): string {
+  if (hoursSpent == null) return '';
+  const n = Number.isInteger(hoursSpent) ? String(hoursSpent) : hoursSpent.toFixed(1).replace('.', ',');
+  return ` · ${n}h`;
 }
 
 // ===== modal de save: escolher jogo (opcional) + formulário treinador =====
@@ -105,8 +115,9 @@ function renderSaveForm(
     trainerName?: string;
     platforms: string[];
     platform?: string;
+    hoursSpent?: number;
     onBack?: () => void;
-    onSubmit: (trainerId: string, trainerName: string, platform: string) => void;
+    onSubmit: (trainerId: string, trainerName: string, platform: string, hoursSpent?: number) => void;
   },
 ) {
   const title = dialog.querySelector<HTMLElement>('[data-modal-title]');
@@ -136,6 +147,11 @@ function renderSaveForm(
             .join('')}
         </select>
       </label>
+      <label class="modal-field">
+        <span>Horas jogadas (opcional)</span>
+        <input type="number" name="hoursSpent" min="0" step="0.5" inputmode="decimal"
+          value="${opts.hoursSpent != null ? opts.hoursSpent : ''}" placeholder="ex.: 24" />
+      </label>
       <div class="modal-actions">
         ${opts.onBack ? '<button type="button" class="btn" data-modal-back>‹ voltar</button>' : '<span></span>'}
         <button type="submit" class="btn primary">${opts.mode === 'create' ? 'Criar save' : 'Salvar'}</button>
@@ -149,8 +165,11 @@ function renderSaveForm(
     const trainerId = String(fd.get('trainerId') || '').trim();
     const trainerName = String(fd.get('trainerName') || '').trim();
     const platform = String(fd.get('platform') || '').trim();
+    const hoursRaw = String(fd.get('hoursSpent') || '').trim();
+    const hoursSpent = hoursRaw ? Number(hoursRaw) : undefined;
     if (!trainerId) return;
-    opts.onSubmit(trainerId, trainerName, platform);
+    if (hoursSpent != null && Number.isNaN(hoursSpent)) return;
+    opts.onSubmit(trainerId, trainerName, platform, hoursSpent);
   });
   if (opts.onBack) {
     body.querySelector('[data-modal-back]')?.addEventListener('click', opts.onBack);
@@ -180,8 +199,8 @@ function openNewSaveModal(params: {
       mode: 'create',
       platforms,
       onBack: showBack ? showPicker : undefined,
-      onSubmit: async (trainerId, trainerName, platform) => {
-        const save = await createSave(game, trainerName || undefined, trainerId, platform || undefined);
+      onSubmit: async (trainerId, trainerName, platform, hoursSpent) => {
+        const save = await createSave(game, trainerName || undefined, trainerId, platform || undefined, hoursSpent);
         dialog.close();
         params.onCreated(save);
       },
@@ -219,9 +238,10 @@ function openEditSaveModal(
     trainerName: save.trainerName,
     platforms,
     platform: save.platform,
-    onSubmit: async (trainerId, trainerName, platform) => {
+    hoursSpent: save.hoursSpent,
+    onSubmit: async (trainerId, trainerName, platform, hoursSpent) => {
       if (trainerId !== save.trainerId) await updateTrainerId(save.trainerId, trainerId);
-      await renameSave(trainerId, trainerName || undefined, platform || undefined);
+      await renameSave(trainerId, trainerName || undefined, platform || undefined, hoursSpent);
       dialog.close();
       onSaved(trainerId);
     },
@@ -236,6 +256,7 @@ export function initPokemonGames() {
   if (!boxes.length) return;
 
   const ownedCount = document.querySelector<HTMLElement>('[data-owned-count]');
+  const completedBadges = Array.from(document.querySelectorAll<HTMLElement>('[data-completed-badge]'));
 
   function parse(box: HTMLInputElement): { game: string; media: Media } {
     const [game, media] = (box.getAttribute('data-owned') || '').split('::');
@@ -259,6 +280,20 @@ export function initPokemonGames() {
     updateOwnedCount();
   }
 
+  async function hydrateCompleted() {
+    if (!completedBadges.length) return;
+    const saves = await listSaves();
+    const completedGames = new Set(saves.filter((s) => s.completed).map((s) => s.game));
+    for (const badge of completedBadges) {
+      const slug = badge.getAttribute('data-completed-badge') || '';
+      const isCompleted = completedGames.has(slug);
+      badge.hidden = !isCompleted;
+      const article = badge.closest<HTMLElement>('.game');
+      if (article) article.dataset.completed = String(isCompleted);
+    }
+    document.dispatchEvent(new CustomEvent(POKEMON_COMPLETED_HYDRATED_EVENT));
+  }
+
   boxes.forEach((box) => {
     box.addEventListener('change', () => {
       const { game, media } = parse(box);
@@ -268,7 +303,60 @@ export function initPokemonGames() {
   });
 
   hydrate();
-  window.addEventListener(REMOTE_SYNC_EVENT, hydrate);
+  hydrateCompleted();
+  window.addEventListener(REMOTE_SYNC_EVENT, () => {
+    hydrate();
+    hydrateCompleted();
+  });
+}
+
+// ===== tela de jogos: filtro por transferência, conquistas e finalizados =====
+//
+// Cada <article class="game"> traz data-bank/data-home/data-transport/
+// data-cheevos renderizados no build (estático) e data-completed hidratado
+// no cliente por initPokemonGames() a partir dos saves no IndexedDB (dinâmico
+// — reflete se algum save do jogo está marcado como completo). O filtro só
+// esconde/mostra no cliente — combinação é "E": com vários filtros ativos,
+// só aparece jogo que atende todos.
+
+export function initPokemonGameFilters() {
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-transfer-filter]'));
+  if (!chips.length) return;
+
+  const games = Array.from(document.querySelectorAll<HTMLElement>('.game'));
+  const gens = Array.from(document.querySelectorAll<HTMLElement>('[data-gen]'));
+  const emptyHint = document.querySelector<HTMLElement>('[data-filter-empty]');
+  const active = new Set<string>();
+
+  function apply() {
+    let anyVisible = false;
+    for (const game of games) {
+      const matches = Array.from(active).every((key) => game.dataset[key] === 'true');
+      game.hidden = active.size > 0 && !matches;
+      if (!game.hidden) anyVisible = true;
+    }
+    for (const gen of gens) {
+      const hasVisible = Array.from(gen.querySelectorAll<HTMLElement>('.game')).some((g) => !g.hidden);
+      gen.hidden = !hasVisible;
+    }
+    if (emptyHint) emptyHint.hidden = anyVisible || active.size === 0;
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const key = chip.getAttribute('data-transfer-filter')!;
+      if (active.has(key)) active.delete(key);
+      else active.add(key);
+      chip.setAttribute('aria-pressed', String(active.has(key)));
+      apply();
+    });
+  });
+
+  // data-completed chega depois (async, via IndexedDB) — reaplica se algum
+  // filtro já estiver ativo quando a hidratação terminar.
+  document.addEventListener(POKEMON_COMPLETED_HYDRATED_EVENT, () => {
+    if (active.size > 0) apply();
+  });
 }
 
 // ===== tela de UM save em /saves/<game>/?save=<trainerId>: pokedex desse save =====
@@ -375,7 +463,9 @@ export function initPokemonSavePage() {
 
     if (trainerNameEl) trainerNameEl.textContent = activeSave.trainerName || '(sem nome)';
     if (trainerIdEl) trainerIdEl.textContent = activeSave.trainerId;
-    if (trainerPlatformEl) trainerPlatformEl.textContent = activeSave.platform ? ` · ${activeSave.platform}` : '';
+    if (trainerPlatformEl) {
+      trainerPlatformEl.textContent = (activeSave.platform ? ` · ${activeSave.platform}` : '') + hoursLabel(activeSave.hoursSpent);
+    }
     if (movedHomeBtn) movedHomeBtn.setAttribute('aria-pressed', String(Boolean(activeSave.movedToHome)));
     if (completedBtn) completedBtn.setAttribute('aria-pressed', String(Boolean(activeSave.completed)));
     if (trainerLine) trainerLine.hidden = false;
@@ -508,7 +598,7 @@ export function initPokemonSavesOverview() {
             <img class="save-cover" src="${withBase(meta.cover)}" alt="" width="400" height="400" loading="lazy" decoding="async" />
             <div class="save-card-info">
               <strong>${escapeHtml(s.trainerName || '(sem nome)')}</strong>
-              <span class="hint">${escapeHtml(meta.name)}${s.platform ? ` · ${escapeHtml(s.platform)}` : ''}</span>
+              <span class="hint">${escapeHtml(meta.name)}${s.platform ? ` · ${escapeHtml(s.platform)}` : ''}${hoursLabel(s.hoursSpent)}</span>
               <span class="trainer-id">@${escapeHtml(s.trainerId)}</span>
             </div>
             ${s.movedToHome ? '<span class="home-icon" title="Movido pro HOME" aria-label="Movido pro HOME"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>' : ''}
@@ -633,7 +723,7 @@ export function initPokemonHomePage() {
               <img class="home-save-cover" src="${withBase(meta.cover)}" alt="" width="400" height="400" loading="lazy" decoding="async" />
               <div class="home-save-info">
                 <strong><a href="${href}">${escapeHtml(s.trainerName || '(sem nome)')}</a></strong>
-                <span class="hint">${escapeHtml(meta.name)}${s.platform ? ` · ${escapeHtml(s.platform)}` : ''} · @${escapeHtml(s.trainerId)}</span>
+                <span class="hint">${escapeHtml(meta.name)}${s.platform ? ` · ${escapeHtml(s.platform)}` : ''}${hoursLabel(s.hoursSpent)} · @${escapeHtml(s.trainerId)}</span>
               </div>
               <span class="home-save-progress">${n}/${entries.length}</span>
             </div>

@@ -12,6 +12,7 @@ import platformsByGen from "../content/hobbies/pokemon/data/platforms-by-generat
 import pokedexes from "../content/hobbies/pokemon/data/pokedexes.json";
 import boxLayout from "../content/hobbies/pokemon/data/box-layout.json";
 import originMarkData from "../content/hobbies/pokemon/data/origin_mark.json";
+import transferSupportData from "../content/hobbies/pokemon/data/transfer-support-by-game-slug.json";
 
 export interface Generation {
 	id: number;
@@ -313,4 +314,27 @@ export function originMarkPath(game: string): string | null {
 	const entry = originMarks.find((m) => m.jogo === jogo);
 	if (!entry) return null;
 	return `hobbies/pokemon/marks/${markFileFromUrl(entry.png_url)}`;
+}
+
+// ===== suporte a transferência (Bank / HOME / Transporte) =====
+
+export interface TransferSupport {
+	bank: boolean;
+	home: boolean;
+	transport: boolean;
+}
+
+const transferSupport = transferSupportData as Record<
+	string,
+	{ bank?: boolean; home?: boolean; transport?: boolean }
+>;
+
+/** Quais métodos de transferência o jogo suporta. Ausente ou `false` no JSON = não suporta. */
+export function transferSupportFor(game: string): TransferSupport {
+	const entry = transferSupport[game];
+	return {
+		bank: entry?.bank === true,
+		home: entry?.home === true,
+		transport: entry?.transport === true,
+	};
 }

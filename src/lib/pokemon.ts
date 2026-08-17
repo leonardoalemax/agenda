@@ -13,6 +13,7 @@ import pokedexes from "../content/hobbies/pokemon/data/pokedexes.json";
 import boxLayout from "../content/hobbies/pokemon/data/box-layout.json";
 import originMarkData from "../content/hobbies/pokemon/data/origin_mark.json";
 import transferSupportData from "../content/hobbies/pokemon/data/transfer-support-by-game-slug.json";
+import marcosData from "../content/hobbies/pokemon/data/marcos.json";
 
 export interface Generation {
 	id: number;
@@ -209,6 +210,10 @@ export function caughtKey(saveId: string, species: string): string {
 	return `pokemon-caught::${saveId}::${species}`;
 }
 
+export function marcoKey(saveId: string, marco: string): string {
+	return `pokemon-marco::${saveId}::${marco}`;
+}
+
 export function spritePath(id: number): string {
 	return `hobbies/pokemon/sprites/${id}.png`;
 }
@@ -331,4 +336,23 @@ export function transferSupportFor(game: string): TransferSupport {
 		home: entry?.home === true,
 		transport: entry?.transport === true,
 	};
+}
+
+// ===== marcos (insígnias e outros marcos pra completar o jogo) =====
+
+export interface Marco {
+	nome: string;
+	url: string;
+}
+
+const marcosByGame = marcosData as Record<string, { name: string; insignias: Marco[] }>;
+
+/** Marcos do jogo (insígnias, líderes, etc.), ou [] se não cadastrado (ex.: Colosseum/XD). */
+export function marcosForGame(game: string): Marco[] {
+	return marcosByGame[game]?.insignias ?? [];
+}
+
+/** Chave estável por marco dentro de um save — o JSON não tem id, só o nome. */
+export function marcoId(nome: string): string {
+	return slugify(nome);
 }

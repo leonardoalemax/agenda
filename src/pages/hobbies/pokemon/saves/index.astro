@@ -64,14 +64,6 @@ const gameIndex = Object.fromEntries(
 </BaseLayout>
 
 <style>
-  .subnav { display: flex; gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
-  .subnav-item {
-    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
-    color: var(--muted); border: 1px solid var(--hairline);
-  }
-  .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
-  .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-
   .new-save-row { display: flex; gap: var(--s-sm); flex-wrap: wrap; margin-bottom: var(--s-lg); }
   .game-filter {
     flex: 1; min-width: 180px; padding: 9px 12px; font: inherit; font-size: 16px;
@@ -81,14 +73,17 @@ const gameIndex = Object.fromEntries(
 
   .saves-list { display: flex; flex-direction: column; gap: var(--s-sm); }
   :global(.save-card) {
-    display: flex; align-items: center; gap: var(--s-md);
+    display: flex; align-items: center; gap: var(--s-md); color: var(--ink);
     border: 1px solid var(--hairline); border-radius: var(--r-lg);
     background: var(--surface); padding: var(--s-sm) var(--s-md);
+    transition: border-color .15s ease;
   }
   :global(.save-card:hover) { border-color: var(--accent); text-decoration: none; }
+  :global(.save-card:hover .save-card-arrow) { color: var(--accent); }
   :global(.save-cover) {
     width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
     border-radius: var(--r-sm); display: block; flex: none;
+    filter: drop-shadow(var(--product-shadow));
   }
   :global(.save-card-info) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   :global(.save-card-info strong) {

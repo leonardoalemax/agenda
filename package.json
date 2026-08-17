@@ -11,14 +11,15 @@
     "gunpla:import": "node scripts/gunpla-import.mjs",
     "astro": "astro",
     "pokemon:sprites": "node scripts/pokemon-sprites.mjs",
+    "pokemon:marcos": "node scripts/pokemon-marcos.mjs",
     "pokemon:ra-map": "node scripts/pokemon-ra-map.mjs",
     "cheevos:sync": "node scripts/cheevos-sync.mjs"
   },
   "dependencies": {
+    "@lucide/astro": "^1.31.0",
     "astro": "^5.2.0",
     "idb": "^8.0.0",
-    "lucide": "^1.31.0",
-    "lucide-react": "^1.31.0"
+    "lucide": "^1.31.0"
   },
   "devDependencies": {
     "@vite-pwa/astro": "^0.5.0",

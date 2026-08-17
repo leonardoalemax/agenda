@@ -18,8 +18,9 @@ import {
   REMOTE_SYNC_EVENT,
   type PokemonSave,
 } from './store';
-import { ownedKey, caughtKey, spritePath, originMarkPath, type Media } from './pokemon';
+import { ownedKey, caughtKey, marcoKey, spritePath, originMarkPath, type Media } from './pokemon';
 import { withBase } from './base';
+import { ICONS } from './icons';
 
 const CAUGHT_PREFIX = 'pokemon-caught::';
 
@@ -64,7 +65,7 @@ function ensureSaveModal(): HTMLDialogElement {
     <div class="modal-card">
       <header class="modal-header">
         <h2 data-modal-title></h2>
-        <button type="button" class="icon-btn" data-modal-close aria-label="Fechar">✕</button>
+        <button type="button" class="icon-btn" data-modal-close aria-label="Fechar"><span class="icon" style="font-size:18px">${ICONS.x}</span></button>
       </header>
       <div class="modal-body" data-modal-body></div>
     </div>
@@ -256,7 +257,9 @@ export function initPokemonGames() {
   if (!boxes.length) return;
 
   const ownedCount = document.querySelector<HTMLElement>('[data-owned-count]');
-  const completedBadges = Array.from(document.querySelectorAll<HTMLElement>('[data-completed-badge]'));
+  const gameArticles = Array.from(document.querySelectorAll<HTMLElement>('.game[data-game]'));
+  const dexProgressRows = Array.from(document.querySelectorAll<HTMLElement>('[data-dex-progress]'));
+  const marcoProgressRows = Array.from(document.querySelectorAll<HTMLElement>('[data-marcos-progress]'));
 
   function parse(box: HTMLInputElement): { game: string; media: Media } {
     const [game, media] = (box.getAttribute('data-owned') || '').split('::');
@@ -280,18 +283,88 @@ export function initPokemonGames() {
     updateOwnedCount();
   }
 
+  // "Completo" não tem mais ícone próprio aqui — é só o filtro "Finalizados"
+  // lendo data-completed, que initPokemonSavePage() já mantém em dia (100%
+  // dos marcos do save = completo). O sinal visual na lista é a barra de
+  // marcos abaixo batendo 100%.
   async function hydrateCompleted() {
-    if (!completedBadges.length) return;
+    if (!gameArticles.length) return;
     const saves = await listSaves();
     const completedGames = new Set(saves.filter((s) => s.completed).map((s) => s.game));
-    for (const badge of completedBadges) {
-      const slug = badge.getAttribute('data-completed-badge') || '';
-      const isCompleted = completedGames.has(slug);
-      badge.hidden = !isCompleted;
-      const article = badge.closest<HTMLElement>('.game');
-      if (article) article.dataset.completed = String(isCompleted);
+    for (const article of gameArticles) {
+      article.dataset.completed = String(completedGames.has(article.dataset.game || ''));
     }
     document.dispatchEvent(new CustomEvent(POKEMON_COMPLETED_HYDRATED_EVENT));
+  }
+
+  // Progresso de captura por jogo: união dos pokémon marcados em TODOS os
+  // saves daquele jogo (não um save específico) ÷ tamanho da dex do jogo.
+  async function hydrateDexProgress() {
+    if (!dexProgressRows.length) return;
+    const saves = await listSaves();
+    const caughtByGame = new Map<string, Set<string>>();
+    await Promise.all(
+      saves.map(async (save) => {
+        const prefix = `${CAUGHT_PREFIX}${save.trainerId}::`;
+        const caught = await getChecksWithPrefix(prefix);
+        let species = caughtByGame.get(save.game);
+        if (!species) {
+          species = new Set();
+          caughtByGame.set(save.game, species);
+        }
+        for (const [key, value] of Object.entries(caught)) {
+          if (value) species.add(key.slice(prefix.length));
+        }
+      }),
+    );
+    for (const row of dexProgressRows) {
+      const slug = row.closest<HTMLElement>('.game')?.dataset.game;
+      const total = Number(row.getAttribute('data-dex-total') || 0);
+      const n = (slug && caughtByGame.get(slug)?.size) || 0;
+      const pct = total ? Math.round((n / total) * 100) : 0;
+      const bar = row.querySelector<HTMLElement>('[data-dex-bar]');
+      const label = row.querySelector<HTMLElement>('[data-dex-label]');
+      if (bar) bar.style.width = `${pct}%`;
+      if (label) label.textContent = `${n}/${total}`;
+      row.querySelector('[data-dex-track]')?.setAttribute('aria-valuenow', String(pct));
+      row.title = `${n} de ${total} pokémon capturados`;
+      row.classList.toggle('empty', n === 0);
+    }
+  }
+
+  // Mesma lógica da barra de captura, mas pra marcos (insígnias etc.):
+  // união dos marcos feitos em TODOS os saves daquele jogo ÷ total cadastrado.
+  async function hydrateMarcoProgress() {
+    if (!marcoProgressRows.length) return;
+    const saves = await listSaves();
+    const doneByGame = new Map<string, Set<string>>();
+    await Promise.all(
+      saves.map(async (save) => {
+        const prefix = `pokemon-marco::${save.trainerId}::`;
+        const done = await getChecksWithPrefix(prefix);
+        let ids = doneByGame.get(save.game);
+        if (!ids) {
+          ids = new Set();
+          doneByGame.set(save.game, ids);
+        }
+        for (const [key, value] of Object.entries(done)) {
+          if (value) ids.add(key.slice(prefix.length));
+        }
+      }),
+    );
+    for (const row of marcoProgressRows) {
+      const slug = row.closest<HTMLElement>('.game')?.dataset.game;
+      const total = Number(row.getAttribute('data-marcos-total') || 0);
+      const n = (slug && doneByGame.get(slug)?.size) || 0;
+      const pct = total ? Math.round((n / total) * 100) : 0;
+      const bar = row.querySelector<HTMLElement>('[data-marcos-bar]');
+      const label = row.querySelector<HTMLElement>('[data-marcos-label]');
+      if (bar) bar.style.width = `${pct}%`;
+      if (label) label.textContent = `${n}/${total}`;
+      row.querySelector('[data-marcos-track]')?.setAttribute('aria-valuenow', String(pct));
+      row.title = `${n} de ${total} marcos completados`;
+      row.classList.toggle('empty', n === 0);
+    }
   }
 
   boxes.forEach((box) => {
@@ -304,9 +377,32 @@ export function initPokemonGames() {
 
   hydrate();
   hydrateCompleted();
+  hydrateDexProgress();
+  hydrateMarcoProgress();
   window.addEventListener(REMOTE_SYNC_EVENT, () => {
     hydrate();
     hydrateCompleted();
+    hydrateDexProgress();
+    hydrateMarcoProgress();
+  });
+}
+
+/**
+ * Card inteiro navega pro save do jogo — exceto cliques nos toggles de
+ * físico/digital (checkbox) ou no link "ver saves" explícito, que já
+ * navegam por conta própria e não podem disparar isso de novo.
+ */
+export function initPokemonGameCards() {
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('.game[data-href]'));
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    card.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.media-toggle') || target.closest('a')) return;
+      const href = card.getAttribute('data-href');
+      if (href) location.href = href;
+    });
   });
 }
 
@@ -381,7 +477,6 @@ export function initPokemonSavePage() {
   const trainerIdEl = document.querySelector<HTMLElement>('[data-trainer-id]');
   const trainerPlatformEl = document.querySelector<HTMLElement>('[data-trainer-platform]');
   const movedHomeBtn = document.querySelector<HTMLButtonElement>('[data-moved-home]');
-  const completedBtn = document.querySelector<HTMLButtonElement>('[data-completed]');
   const monButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-caught]'));
   const bar = document.querySelector<HTMLElement>('[data-progress-bar]');
   const track = document.querySelector<HTMLElement>('[data-progress-track]');
@@ -389,6 +484,11 @@ export function initPokemonSavePage() {
   const monSearch = document.querySelector<HTMLInputElement>('[data-mon-search]');
   const monSearchEmpty = document.querySelector<HTMLElement>('[data-mon-search-empty]');
   const boxes = Array.from(document.querySelectorAll<HTMLElement>('.box'));
+
+  const marcoButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-marco-toggle]'));
+  const marcoBar = document.querySelector<HTMLElement>('[data-marco-progress-bar]');
+  const marcoTrack = document.querySelector<HTMLElement>('[data-marco-progress-track]');
+  const marcoProgressLabel = document.querySelector<HTMLElement>('[data-marco-progress-label]');
 
   const monEntries = monButtons.map((btn) => {
     const li = btn.closest<HTMLElement>('[data-mon]')!;
@@ -421,6 +521,19 @@ export function initPokemonSavePage() {
     btn.closest('[data-mon]')?.classList.toggle('caught', value);
   }
 
+  function isMarcoDone(btn: HTMLButtonElement): boolean {
+    return btn.getAttribute('aria-pressed') === 'true';
+  }
+  function setMarcoDone(btn: HTMLButtonElement, value: boolean): void {
+    btn.setAttribute('aria-pressed', String(value));
+  }
+  function updateMarcoProgress(doneCount: number) {
+    const pct = marcoButtons.length ? Math.round((doneCount / marcoButtons.length) * 100) : 0;
+    if (marcoBar) marcoBar.style.width = `${pct}%`;
+    if (marcoProgressLabel) marcoProgressLabel.textContent = `${doneCount}/${marcoButtons.length} — ${pct}%`;
+    marcoTrack?.setAttribute('aria-valuenow', String(pct));
+  }
+
   let activeSave: PokemonSave | null = null;
 
   function updateProgress(caughtCount: number) {
@@ -441,6 +554,35 @@ export function initPokemonSavePage() {
       if (v) n++;
     }
     updateProgress(n);
+  }
+
+  async function hydrateMarcos() {
+    if (!activeSave || !marcoButtons.length) return;
+    const saved = await getChecksWithPrefix(`pokemon-marco::${activeSave.trainerId}::`);
+    let n = 0;
+    for (const btn of marcoButtons) {
+      const id = btn.getAttribute('data-marco-toggle') || '';
+      const v = Boolean(saved[marcoKey(activeSave.trainerId, id)]);
+      setMarcoDone(btn, v);
+      if (v) n++;
+    }
+    updateMarcoProgress(n);
+    await syncCompletedFromMarcos();
+  }
+
+  /**
+   * "Completo" não é mais um botão manual — é derivado: 100% dos marcos
+   * cadastrados pro jogo feitos neste save = completo. Jogo sem marco
+   * cadastrado (ex.: Colosseum/XD) nunca vira completo por aqui, já que
+   * não há como saber; o campo só existe pra alimentar a lista de jogos
+   * (badge "Finalizados") e o card de save em /saves/.
+   */
+  async function syncCompletedFromMarcos() {
+    if (!activeSave || !marcoButtons.length) return;
+    const allDone = marcoButtons.every(isMarcoDone);
+    if (activeSave.completed === allDone) return;
+    activeSave.completed = allDone;
+    await setSaveCompleted(activeSave.trainerId, allDone);
   }
 
   function setUrlTrainerId(trainerId: string) {
@@ -467,11 +609,11 @@ export function initPokemonSavePage() {
       trainerPlatformEl.textContent = (activeSave.platform ? ` · ${activeSave.platform}` : '') + hoursLabel(activeSave.hoursSpent);
     }
     if (movedHomeBtn) movedHomeBtn.setAttribute('aria-pressed', String(Boolean(activeSave.movedToHome)));
-    if (completedBtn) completedBtn.setAttribute('aria-pressed', String(Boolean(activeSave.completed)));
     if (trainerLine) trainerLine.hidden = false;
     if (dexWrap) dexWrap.hidden = false;
     if (noSaveMsg) noSaveMsg.hidden = true;
     await hydrateDex();
+    await hydrateMarcos();
   }
 
   monButtons.forEach((btn) => {
@@ -482,6 +624,18 @@ export function initPokemonSavePage() {
       setCaught(btn, next);
       setCheck(caughtKey(activeSave.trainerId, species), next);
       updateProgress(monButtons.filter(isCaught).length);
+    });
+  });
+
+  marcoButtons.forEach((btn) => {
+    const id = btn.getAttribute('data-marco-toggle') || '';
+    btn.addEventListener('click', async () => {
+      if (!activeSave) return;
+      const next = !isMarcoDone(btn);
+      setMarcoDone(btn, next);
+      setCheck(marcoKey(activeSave.trainerId, id), next);
+      updateMarcoProgress(marcoButtons.filter(isMarcoDone).length);
+      await syncCompletedFromMarcos();
     });
   });
 
@@ -498,13 +652,6 @@ export function initPokemonSavePage() {
     activeSave.movedToHome = !activeSave.movedToHome;
     movedHomeBtn.setAttribute('aria-pressed', String(activeSave.movedToHome));
     setSaveMovedToHome(activeSave.trainerId, activeSave.movedToHome);
-  });
-
-  completedBtn?.addEventListener('click', () => {
-    if (!activeSave) return;
-    activeSave.completed = !activeSave.completed;
-    completedBtn.setAttribute('aria-pressed', String(activeSave.completed));
-    setSaveCompleted(activeSave.trainerId, activeSave.completed);
   });
 
   document.querySelector('[data-delete-active]')?.addEventListener('click', async () => {
@@ -529,6 +676,25 @@ export function initPokemonSavePage() {
     await setChecksBulk(keys, false);
     for (const btn of monButtons) setCaught(btn, false);
     updateProgress(0);
+  });
+
+  document.querySelector('[data-marco-check-all]')?.addEventListener('click', async () => {
+    if (!activeSave) return;
+    const keys = marcoButtons.map((b) => marcoKey(activeSave!.trainerId, b.getAttribute('data-marco-toggle') || ''));
+    await setChecksBulk(keys, true);
+    for (const btn of marcoButtons) setMarcoDone(btn, true);
+    updateMarcoProgress(marcoButtons.length);
+    await syncCompletedFromMarcos();
+  });
+
+  document.querySelector('[data-marco-uncheck-all]')?.addEventListener('click', async () => {
+    if (!activeSave) return;
+    if (marcoButtons.some(isMarcoDone) && !confirm(`Desmarcar os ${marcoButtons.length} marcos deste save?`)) return;
+    const keys = marcoButtons.map((b) => marcoKey(activeSave!.trainerId, b.getAttribute('data-marco-toggle') || ''));
+    await setChecksBulk(keys, false);
+    for (const btn of marcoButtons) setMarcoDone(btn, false);
+    updateMarcoProgress(0);
+    await syncCompletedFromMarcos();
   });
 
   load();
@@ -601,8 +767,8 @@ export function initPokemonSavesOverview() {
               <span class="hint">${escapeHtml(meta.name)}${s.platform ? ` · ${escapeHtml(s.platform)}` : ''}${hoursLabel(s.hoursSpent)}</span>
               <span class="trainer-id">@${escapeHtml(s.trainerId)}</span>
             </div>
-            ${s.movedToHome ? '<span class="home-icon" title="Movido pro HOME" aria-label="Movido pro HOME"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>' : ''}
-            ${s.completed ? '<span class="completed-icon" title="Completado" aria-label="Completado"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v4M4 9h16M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><polyline points="9 12 12 15 16 11"/></svg></span>' : ''}
+            ${s.movedToHome ? `<span class="home-icon" title="Movido pro HOME" aria-label="Movido pro HOME">${ICONS.house}</span>` : ''}
+            ${s.completed ? `<span class="completed-icon" title="Completado" aria-label="Completado">${ICONS['monitor-check']}</span>` : ''}
             <div class="save-card-progress">
               <div class="progress"><span style="width:${pct}%"></span></div>
               <span class="hint">${n}/${meta.total} — ${pct}%</span>

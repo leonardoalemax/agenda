@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Icon from '../../../components/Icon.astro';
+import PokeballIcon from '../../../components/PokeballIcon.astro';
+import { Trophy, Badge, Disc, Cloud, ChevronRight } from '@lucide/astro';
 import { withBase } from '../../../lib/base';
-import { allGenerations, generationLabel, gameName, mediaForGame, mediaLabel, coverPath, retroGameFor, transferSupportFor } from '../../../lib/pokemon';
+import { allGenerations, generationLabel, gameName, mediaForGame, mediaLabel, coverPath, retroGameFor, transferSupportFor, dexForGame, marcosForGame } from '../../../lib/pokemon';
 import { cheevosGame } from '../../../lib/cheevos';
 
 const gens = allGenerations();
@@ -33,6 +34,8 @@ const sections = gens.map((gen) => ({
     media: mediaForGame(gen.name, g.slug),
     cheevos: cheevosFor(g.slug),
     transfer: transferSupportFor(g.slug),
+    dexTotal: dexForGame(gen.name, g.slug).length,
+    marcosTotal: marcosForGame(g.slug).length,
   })),
 }));
 
@@ -60,6 +63,7 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
     <a class="subnav-item" href={withBase('hobbies/pokemon/home')}>HOME</a>
   </nav>
 
+  <span class="filters-label">Filtrar</span>
   <div class="transfer-filters" role="group" aria-label="Filtrar jogos">
     <button type="button" class="filter-chip" data-transfer-filter="bank" aria-pressed="false">Bank</button>
     <button type="button" class="filter-chip" data-transfer-filter="home" aria-pressed="false">HOME</button>
@@ -80,6 +84,8 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
         {games.map((game) => (
           <article
             class="game"
+            data-game={game.slug}
+            data-href={withBase(`hobbies/pokemon/saves/?game=${game.slug}`)}
             data-bank={String(game.transfer.bank)}
             data-home={String(game.transfer.home)}
             data-transport={String(game.transfer.transport)}
@@ -93,37 +99,25 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
               height="400"
               loading="lazy"
               decoding="async" />
-            <div class="game-title-row">
-              <h3>{game.name}</h3>
-              <span class="completed-badge" data-completed-badge={game.slug} hidden title="Save completo (100% pokédex)">
-                <Icon name="monitor-check" size={14} />
-                <span>completo</span>
-              </span>
-            </div>
+            <h3 class="game-name">{game.name}</h3>
             <div class="media-row">
-              {game.media.map((m) => (
-                <label class="media-toggle" data-media={m}>
-                  <input type="checkbox" data-owned={`${game.slug}::${m}`} />
-                  {m === 'physical' ? (
-                    <svg class="media-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/>
-                      <circle cx="8" cy="8" r="2" fill="currentColor"/>
-                    </svg>
-                  ) : (
-                    <svg class="media-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M4.5 12.5a2.75 2.75 0 0 1-.4-5.47 3.5 3.5 0 0 1 6.78-1.62A2.75 2.75 0 0 1 11.5 12.5h-7Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-                    </svg>
-                  )}
-                  <span>{mediaLabel(m)}</span>
-                </label>
-              ))}
+              {(['physical', 'digital'] as const).map((m) =>
+                game.media.includes(m) ? (
+                  <label class="media-toggle" data-media={m} title={mediaLabel(m)}>
+                    <input type="checkbox" class="sr-only" data-owned={`${game.slug}::${m}`} />
+                    {m === 'physical' ? <Disc size={18} /> : <Cloud size={18} />}
+                  </label>
+                ) : (
+                  <span class="media-toggle media-toggle-empty" aria-hidden="true"></span>
+                ),
+              )}
             </div>
-            {game.cheevos && (
-              <div
-                class={`game-cheevos${game.cheevos.earned === 0 ? ' empty' : ''}`}
-                title={`${game.cheevos.earned} de ${game.cheevos.total} conquistas no RetroAchievements`}>
-                <div class="game-cheevos-content">
-                  <Icon name="trophy" size={16} />
+            <div class="game-progress">
+              {game.cheevos && (
+                <div
+                  class={`progress-row${game.cheevos.earned === 0 ? ' empty' : ''}`}
+                  title={`${game.cheevos.earned} de ${game.cheevos.total} conquistas no RetroAchievements`}>
+                  <Trophy size={16} />
                   <div
                     class="progress"
                     role="progressbar"
@@ -133,12 +127,42 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
                     aria-valuenow={game.cheevos.pct}>
                     <span style={`width:${game.cheevos.pct}%`}></span>
                   </div>
-                  <span class="game-cheevos-label">{game.cheevos.earned}/{game.cheevos.total}</span>
+                  <span class="progress-label">{game.cheevos.earned}/{game.cheevos.total}</span>
                 </div>
+              )}
+              {game.marcosTotal > 0 && (
+                <div class="progress-row empty" data-marcos-progress data-marcos-total={game.marcosTotal}>
+                  <Badge size={16} />
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label={`Marcos de ${game.name}`}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                    data-marcos-track>
+                    <span data-marcos-bar></span>
+                  </div>
+                  <span class="progress-label" data-marcos-label>0/{game.marcosTotal}</span>
+                </div>
+              )}
+              <div class="progress-row empty" data-dex-progress data-dex-total={game.dexTotal}>
+                <PokeballIcon size={16} />
+                <div
+                  class="progress"
+                  role="progressbar"
+                  aria-label={`Pokédex de ${game.name}`}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  data-dex-track>
+                  <span data-dex-bar></span>
+                </div>
+                <span class="progress-label" data-dex-label>0/{game.dexTotal}</span>
               </div>
-            )}
-            <a class="game-saves-link" href={withBase(`hobbies/pokemon/saves/?game=${game.slug}`)}>
-              <span>ver saves</span> ›
+            </div>
+            <a class="game-saves-link" href={withBase(`hobbies/pokemon/saves/?game=${game.slug}`)} aria-label={`Ver saves de ${game.name}`}>
+              <ChevronRight size={20} />
             </a>
           </article>
         ))}
@@ -147,28 +171,26 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
   ))}
 
   <script>
-    import { initPokemonGames, initPokemonGameFilters } from '../../../lib/pokemon-client';
+    import { initPokemonGames, initPokemonGameFilters, initPokemonGameCards } from '../../../lib/pokemon-client';
     initPokemonGames();
     initPokemonGameFilters();
+    initPokemonGameCards();
   </script>
 </BaseLayout>
 
 <style>
-  .subnav { display: flex; gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
-  .subnav-item {
-    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
-    color: var(--muted); border: 1px solid var(--hairline);
+  .filters-label {
+    display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.03em; color: var(--muted); margin-bottom: 8px;
   }
-  .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
-  .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-
-  .transfer-filters { display: flex; gap: var(--s-sm); margin-bottom: var(--s-md); }
+  .transfer-filters { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-bottom: var(--s-md); }
   .filter-chip {
-    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
-    color: var(--muted); background: var(--surface); border: 1px solid var(--hairline);
-    cursor: pointer;
+    padding: 5px 13px; border-radius: var(--r-pill); font-size: 13px; font-weight: 500;
+    color: var(--muted); background: transparent; border: 1px solid var(--hairline);
+    cursor: pointer; transition: border-color .15s ease, background-color .15s ease, color .15s ease;
   }
   .filter-chip:hover { border-color: var(--accent); }
+  .filter-chip:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
   .filter-chip[aria-pressed="true"] {
     color: var(--on-accent); background: var(--accent); border-color: var(--accent);
   }
@@ -182,85 +204,91 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
   }
 
   .game-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+
+  /* Desktop: uma linha só, tudo centralizado no eixo vertical. O card
+     inteiro navega pro save (initPokemonGameCards) — só os toggles e o
+     link explícito ficam de fora disso. A coluna de progresso é o único
+     item flexível: come o espaço que sobrar entre os elementos de largura
+     fixa; sem ela, "ver saves" (margin-left: auto) assume esse papel e
+     continua preso na borda direita. */
   .game {
     border: 1px solid var(--hairline); border-radius: var(--r-lg);
     background: var(--surface); padding: var(--s-sm) var(--s-md);
-    display: grid; grid-template-columns: 48px 1fr 160px 50px;
-    gap: var(--s-md); align-items: center;
+    display: flex; align-items: center; gap: var(--s-md);
+    cursor: pointer; transition: border-color .15s ease;
   }
+  .game:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); }
   .game[hidden] { display: none; }
   .game-cover {
     width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
-    border-radius: var(--r-sm); display: block; flex: none; grid-row: 1 / 3;
+    border-radius: var(--r-sm); display: block; flex: none;
+    filter: drop-shadow(var(--product-shadow));
   }
-  .game-title-row {
-    display: flex; align-items: center; gap: 6px; min-width: 0;
-    grid-column: 2; grid-row: 1;
-  }
-  .game h3 {
+  .game-name {
     margin: 0; font-size: 15px; letter-spacing: -0.374px;
     min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    flex: 1;
+    flex: 0 1 200px;
   }
-  .completed-badge {
-    flex: none; display: flex; align-items: center; gap: 3px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
-    color: #10b981; background: color-mix(in srgb, #10b981 12%, transparent);
-    border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
-    border-radius: var(--r-pill); padding: 2px 7px;
+  /* Toggle físico/digital: só o ícone é clicável — o checkbox real fica
+     visualmente escondido (.sr-only) mas continua no DOM pra teclado/leitor
+     de tela. Cinza solto = desmarcado, azul = marcado; sem caixa, sem texto.
+     Sempre 2 caixas de 32px nessa fileira (físico, digital), existindo ou
+     não pra aquele jogo — um slot vazio ocupa o mesmo lugar em vez de
+     encolher a fileira, senão a barra de progresso ao lado (que é quem
+     sobra o espaço) começaria numa posição diferente em cada card. */
+  .media-row { display: flex; align-items: center; gap: 2px; flex: none; }
+  .media-toggle {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--r-sm);
+    color: var(--muted); cursor: pointer;
+    transition: color .15s ease, background-color .15s ease;
   }
-  .completed-badge :global(.icon) { color: inherit; }
-  .media-row {
-    display: flex; gap: var(--s-sm); flex-wrap: nowrap;
-    grid-column: 2; grid-row: 2;
-  }
-  .media-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px; min-height: auto; }
-  .media-toggle input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex: none; }
-  .media-icon { flex: none; color: var(--muted); }
-  .media-toggle:has(input:checked) .media-icon { color: var(--accent); }
+  .media-toggle:hover { background: var(--surface-2); }
+  .media-toggle:has(input:checked) { color: var(--accent); }
+  .media-toggle:has(input:focus-visible) { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+  .media-toggle-empty { cursor: default; pointer-events: none; }
+
   .game-saves-link {
-    font-size: 13px; color: var(--muted); white-space: nowrap;
-    grid-column: 4; grid-row: 1 / 3;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); flex: none; margin-left: auto;
   }
   .game-saves-link:hover { color: var(--link); }
 
-  /* Conquistas (ícone + barra + label): ~40% de 160px */
-  .game-cheevos {
-    grid-column: 3; grid-row: 1 / 3;
-    display: flex; align-items: center; gap: 6px; height: 100%;
+  /* Progresso: até 3 barras empilhadas (conquistas + marcos + pokédex),
+     cada uma só existe se o jogo tiver o dado — sempre centralizadas no
+     espaço vertical do card, ocupando o resto da linha. */
+  .game-progress {
+    flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
   }
-  .game-cheevos-content {
-    display: flex; align-items: center; gap: 6px; width: 100%;
-  }
-  .game-cheevos :global(.icon) { flex: none; color: var(--muted); }
-  .game-cheevos .progress {
+  .progress-row { display: flex; align-items: center; gap: 6px; width: 100%; }
+  .progress-row :global(svg) { flex: none; color: var(--muted); }
+  .progress-row .progress {
     flex: 1; height: 5px; background: var(--surface-2);
     border-radius: var(--r-pill); overflow: hidden;
   }
-  .game-cheevos .progress span { display: block; height: 100%; background: var(--accent); }
-  .game-cheevos-label {
+  .progress-row .progress span { display: block; height: 100%; background: var(--accent); }
+  .progress-label {
     font-size: 12px; color: var(--muted); white-space: nowrap;
     font-variant-numeric: tabular-nums; flex: none;
   }
-  /* Nunca jogado fica discreto: é oferta, não pendência. */
-  .game-cheevos.empty { opacity: .55; }
+  /* Nunca jogado / nunca capturado fica discreto: é oferta, não pendência. */
+  .progress-row.empty { opacity: .55; }
 
   @media (max-width: 600px) {
     .game {
-      grid-template-columns: 48px 1fr;
-      grid-template-rows: auto auto auto;
+      display: grid; grid-template-columns: 48px 1fr auto;
+      grid-template-rows: auto auto auto; align-items: center;
     }
-    .game-cover { grid-row: 1 / 4; }
-    .game-title-row { grid-column: 2; grid-row: 1; }
+    .game-cover { grid-column: 1; grid-row: 1 / 4; }
+    .game-name { grid-column: 2; grid-row: 1; flex: unset; }
     .media-row { grid-column: 2; grid-row: 2; }
-    .game-cheevos {
+    .game-progress {
       grid-column: 2; grid-row: 3;
-      justify-self: stretch; height: auto; padding-top: var(--s-xs);
+      flex: unset; min-width: 0; padding-top: var(--s-xs);
     }
-    .media-toggle span { display: none; }
     .game-saves-link {
-      grid-column: 3; grid-row: 1 / 4; align-self: center;
+      grid-column: 3; grid-row: 1 / 4; align-self: center; margin-left: 0;
     }
-    .game-saves-link span { display: none; }
   }
 </style>

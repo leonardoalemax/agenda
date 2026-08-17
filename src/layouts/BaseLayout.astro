@@ -89,10 +89,14 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
 
       // Botão "atualizar": em vez de só pedir pro SW atual buscar uma versão
       // nova (que às vezes não é suficiente — SW órfão de outra versão do
-      // scope, cache antigo que o precache não limpou), derruba TUDO que
-      // pode estar servindo conteúdo velho: desregistra todo service worker
-      // deste scope, apaga todo Cache Storage, e só then recarrega. Isso
-      // sempre resulta em HTML/JS/CSS frescos da rede, nunca uma tela velha.
+      // scope, cache antigo que o precache não limpou), derruba o que pode
+      // estar servindo conteúdo velho: desregistra todo service worker deste
+      // scope e apaga todo Cache Storage, e só então recarrega. Isso sempre
+      // resulta em HTML/JS/CSS frescos da rede, nunca uma tela velha.
+      //
+      // NUNCA mexe no IndexedDB aqui — é dado do usuário (saves, checks,
+      // notas, preços), não cache de asset. Já vazou uma vez (limpava tudo
+      // a cada clique) e apagou dado de verdade; sem essa linha de novo.
       btn?.addEventListener('click', async () => {
         if (btn.classList.contains('busy')) return;
         btn.classList.add('busy');
@@ -106,31 +110,6 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
           if ('caches' in window) {
             const names = await caches.keys();
             await Promise.all(names.map((n) => caches.delete(n)));
-          }
-          // Limpa dados de usuário mas preserva token do gist
-          if ('indexedDB' in window) {
-            await new Promise<void>((resolve) => {
-              const req = indexedDB.open('minha-agenda');
-              req.onsuccess = () => {
-                try {
-                  const db = req.result;
-                  const tx = db.transaction(['checks', 'notes', 'prices', 'pokemonSaves'], 'readwrite');
-                  // Limpa stores de dados (checks, notes, prices, pokemonSaves)
-                  // mas deixa 'meta' intacto (contém gh-token e gist-id)
-                  tx.objectStore('checks').clear();
-                  tx.objectStore('notes').clear();
-                  tx.objectStore('prices').clear();
-                  tx.objectStore('pokemonSaves').clear();
-                  tx.oncomplete = () => {
-                    db.close();
-                    resolve();
-                  };
-                } catch {
-                  resolve();
-                }
-              };
-              req.onerror = () => resolve();
-            });
           }
         } catch {
           // segue pro reload mesmo se algo falhar aqui — melhor recarregar

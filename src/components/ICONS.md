@@ -1,55 +1,43 @@
-# Icon Component (Lucide Icons)
+# Ícones (Lucide)
 
-Componente reutilizável para renderizar ícones do [Lucide Icons](https://lucide.dev).
+Ícone de UI é sempre do [Lucide](https://lucide.dev). Nunca emoji, nunca SVG
+copiado à mão de outro lugar.
 
-## Uso
+## Em páginas `.astro`
+
+Use o pacote `@lucide/astro` direto — cada ícone é um componente Astro
+próprio, importado pelo nome:
 
 ```astro
 ---
-import Icon from './Icon.astro';
+import { Search, Trash2 } from '@lucide/astro';
 ---
 
-<Icon name="search" size={20} />
-<Icon name="chevron-down" />
-<Icon name="plus" class="custom-class" />
+<Search size={20} />
+<Trash2 size={18} class="text-muted" />
 ```
 
-## Props
+Não existe um componente `<Icon name="..." />` genérico neste projeto — é
+`@lucide/astro` puro, sem wrapper. O nome do ícone em [lucide.dev](https://lucide.dev/icons)
+(kebab-case, ex.: `trash-2`) vira PascalCase no import (`Trash2`).
 
-- `name` (string): Nome do ícone em kebab-case (ex: `search`, `chevron-down`, `plus`)
-- `size` (number, opcional): Tamanho em pixels. Padrão: `24`
-- `class` (string, opcional): Classes CSS adicionais
+Como o ícone entra via um componente filho (não o template da própria
+página), CSS que precise mirar o `<svg>` renderizado tem que usar
+`:global()`, ex.: `.minha-area :global(svg) { color: var(--muted); }`.
 
-## Ícones Disponíveis
+## No cliente (`pokemon-client.ts`)
 
-Atualmente suportados:
-- `search` — Ícone de busca (lupa)
-- `chevron-down` — Seta para baixo
-- `plus` — Sinal de mais
-- `x` — Sinal de fechar (X)
+`pokemon-client.ts` monta HTML por `innerHTML`/template string — fora do
+alcance do Astro, `@lucide/astro` não serve aí. Pra isso existe
+`src/lib/icons.ts`, que importa os mesmos ícones do pacote `lucide` (a base,
+sem o wrapper Astro) e serializa pra string. Só tem os poucos ícones que o
+client realmente injeta (hoje: `x`, `house`, `monitor-check`) — não duplique
+a lista de `@lucide/astro` aqui, adicione só o que for usado nesse arquivo.
 
-### Adicionar Novos Ícones
-
-1. Vá em [lucide.dev](https://lucide.dev) e encontre o ícone desejado
-2. Copie o SVG do ícone
-3. Adicione à lista `icons` no arquivo `Icon.astro` com o nome em kebab-case
-
-Exemplo:
-```astro
-const icons: Record<string, string> = {
-  // ... ícones existentes ...
-  'star': `<svg xmlns="..." /* copie o SVG daqui */</svg>`,
-};
+```ts
+import { ICONS } from './icons';
+el.innerHTML = `<span class="icon">${ICONS.x}</span>`;
 ```
 
-## Estilo
-
-O ícone herda `currentColor`, então responde à cor do texto. Use CSS normalmente:
-
-```astro
-<Icon name="search" class="text-blue-500" />
-```
-
-```css
-.text-blue-500 { color: #3b82f6; }
-```
+Pra adicionar um ícone novo aí: importe o export do pacote `lucide` (mesmo
+nome PascalCase de `@lucide/astro`) e registre no mapa `ICONS`.

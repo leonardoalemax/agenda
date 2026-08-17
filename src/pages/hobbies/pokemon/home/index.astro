@@ -57,14 +57,6 @@ const gameIndex = Object.fromEntries(
 </BaseLayout>
 
 <style>
-  .subnav { display: flex; gap: var(--s-sm); margin: var(--s-md) 0 var(--s-lg); }
-  .subnav-item {
-    padding: 6px 14px; border-radius: var(--r-pill); font-size: 14px; font-weight: 500;
-    color: var(--muted); border: 1px solid var(--hairline);
-  }
-  .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
-  .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-
   :global(.home-save) { margin-bottom: var(--s-xl); }
   :global(.home-save-header) {
     display: flex; align-items: center; gap: var(--s-md); margin-bottom: var(--s-md);
@@ -72,6 +64,7 @@ const gameIndex = Object.fromEntries(
   :global(.home-save-cover) {
     width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
     border-radius: var(--r-sm); display: block; flex: none;
+    filter: drop-shadow(var(--product-shadow));
   }
   :global(.home-save-info) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   :global(.home-save-info strong) { font-size: 16px; letter-spacing: -0.32px; }

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Icon from '../../../components/Icon.astro';
+import { Search } from '@lucide/astro';
 import { withBase } from '../../../lib/base';
 import { cheevosIndex, allCheevosGames, gameIconPath, awardLabel } from '../../../lib/cheevos';
 
@@ -37,7 +37,7 @@ const fmtNum = (n: number) => new Intl.NumberFormat('pt-BR').format(n);
       </p>
 
       <div class="mon-search-wrapper">
-        <Icon name="search" size={18} />
+        <Search size={18} />
         <input
           class="mon-search"
           type="search"
@@ -124,7 +124,7 @@ const fmtNum = (n: number) => new Intl.NumberFormat('pt-BR').format(n);
     border: 1px solid var(--hairline); border-radius: var(--r-md);
     color: var(--muted);
   }
-  .mon-search-wrapper :global(.icon) { font-size: 18px; flex: none; }
+  .mon-search-wrapper :global(svg) { flex: none; }
   .mon-search {
     display: block; flex: 1; margin-bottom: 0;
     padding: 10px 0; font: inherit; font-size: 16px;

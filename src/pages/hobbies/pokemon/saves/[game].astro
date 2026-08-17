@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
-import Icon from '../../../../components/Icon.astro';
+import { House, Pencil, Trash2, Check, X, Search } from '@lucide/astro';
 import { withBase } from '../../../../lib/base';
-import { allGenerations, dexForGame, layoutForGame, boxesFor, gameName, spritePath, coverPath, platformsForGame, originMarkPath } from '../../../../lib/pokemon';
+import { allGenerations, dexForGame, layoutForGame, boxesFor, gameName, spritePath, coverPath, platformsForGame, originMarkPath, marcosForGame, marcoId } from '../../../../lib/pokemon';
 
 export async function getStaticPaths() {
   const gens = allGenerations();
@@ -25,6 +25,7 @@ const layout = layoutForGame(game);
 const boxes = boxesFor(entries, layout);
 const showBoxes = layout.type !== 'infinite-list' && boxes.length > 1;
 const platforms = platformsForGame(genName, game);
+const marcos = marcosForGame(game);
 ---
 
 <BaseLayout title={`${gameName(game)} — save`} description={`Save e pokédex de ${gameName(game)}`}>
@@ -56,25 +57,63 @@ const platforms = platformsForGame(genName, game);
   </p>
 
   <div data-dex-wrap hidden>
+    {marcos.length > 0 && (
+      <section class="marcos-section">
+        <div class="marcos-header">
+          <h2 class="marcos-title">Marcos</h2>
+          <div class="marcos-actions">
+            <button class="icon-btn" type="button" data-marco-check-all title="Marcar todos" aria-label="Marcar todos os marcos">
+              <Check size={18} />
+            </button>
+            <button class="icon-btn" type="button" data-marco-uncheck-all title="Desmarcar todos" aria-label="Desmarcar todos os marcos">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div
+            class="progress"
+            role="progressbar"
+            aria-label="Progresso dos marcos"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            data-marco-progress-track>
+            <span data-marco-progress-bar></span>
+          </div>
+          <span class="hint" data-marco-progress-label>0/{marcos.length} — 0%</span>
+        </div>
+        <ul class="marco-list">
+          {marcos.map((m) => (
+            <li class="marco" data-marco>
+              <button type="button" class="marco-btn" data-marco-toggle={marcoId(m.nome)} aria-pressed="false">
+                <img class="marco-icon" src={withBase(m.url)} alt="" width="40" height="40" loading="lazy" decoding="async" />
+                <span class="marco-name">{m.nome}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
     <div class="active-save-info">
-      <button class="icon-btn moved-home-btn" type="button" data-moved-home title="Movido pro HOME" aria-label="Movido pro HOME">
-        <Icon name="house" size={20} />
-      </button>
-      <button class="icon-btn completed-btn" type="button" data-completed title="Completado" aria-label="Completado">
-        <Icon name="monitor-check" size={20} />
-      </button>
+      <div class="active-save-status">
+        <button class="icon-btn moved-home-btn" type="button" data-moved-home title="Movido pro HOME" aria-label="Movido pro HOME">
+          <House size={20} />
+        </button>
+      </div>
       <div class="active-save-actions">
-        <button class="icon-btn" type="button" data-rename-active title="Renomear" aria-label="Renomear">✎</button>
-        <button class="icon-btn" type="button" data-delete-active title="Apagar" aria-label="Apagar">🗑</button>
+        <button class="icon-btn" type="button" data-rename-active title="Renomear" aria-label="Renomear">
+          <Pencil size={18} />
+        </button>
+        <button class="icon-btn" type="button" data-delete-active title="Apagar" aria-label="Apagar">
+          <Trash2 size={18} />
+        </button>
         <button class="icon-btn" type="button" data-check-all title="Marcar todos" aria-label="Marcar todos">
-          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
-            <path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <Check size={18} />
         </button>
         <button class="icon-btn" type="button" data-uncheck-all title="Desmarcar todos" aria-label="Desmarcar todos">
-          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
-            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
+          <X size={18} />
         </button>
       </div>
     </div>
@@ -94,7 +133,7 @@ const platforms = platformsForGame(genName, game);
     </div>
 
     <div class="mon-search-wrapper">
-      <Icon name="search" size={18} />
+      <Search size={18} />
       <input
         class="mon-search"
         type="search"
@@ -168,26 +207,26 @@ const platforms = platformsForGame(genName, game);
   .save-hero-cover {
     width: 72px; height: 72px; object-fit: contain; flex: none;
     background: var(--surface-2); border-radius: var(--r-md);
+    filter: drop-shadow(var(--product-shadow));
   }
   .save-hero h1 { margin: 0; }
   .save-trainer-line { margin: 4px 0 0; }
 
-  /* ===== info + ações do save ativo ===== */
+  /* ===== info + ações do save ativo =====
+     Dois grupos: status (movido pro HOME) à esquerda, utilitários
+     (renomear/apagar/marcar) à direita. "Completo" não é mais um botão
+     aqui — é automático, derivado de 100% dos marcos feitos (ver seção
+     de Marcos abaixo e initPokemonSavePage). */
   .active-save-info {
     display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm);
     flex-wrap: wrap; background: var(--surface); padding: var(--s-sm) var(--s-md);
   }
+  .active-save-status { display: flex; gap: var(--s-sm); }
   .moved-home-btn {
     color: var(--muted); transition: color .15s ease;
   }
   .moved-home-btn[aria-pressed="true"] {
     color: #f59e0b;
-  }
-  .completed-btn {
-    color: var(--muted); transition: color .15s ease;
-  }
-  .completed-btn[aria-pressed="true"] {
-    color: #10b981;
   }
   .active-save-actions { display: flex; gap: var(--s-sm); }
 
@@ -197,6 +236,47 @@ const platforms = platformsForGame(genName, game);
   .progress-wrap .hint { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s ease; }
 
+  /* ===== marcos (insígnias e outros marcos pra completar o jogo) =====
+     Igual em espírito à pokédex (marcar/desmarcar, marcar todos/desmarcar
+     todos, barra de progresso) mas em chips numa lista só — poucos itens
+     (tipicamente ~9), não precisa de caixas paginadas. */
+  .marcos-section {
+    margin-bottom: var(--s-lg);
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--r-lg); padding: var(--s-md);
+  }
+  .marcos-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s-sm); margin-bottom: var(--s-md);
+  }
+  .marcos-title { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.374px; }
+  .marcos-actions { display: flex; gap: var(--s-sm); }
+  .marcos-section .progress-wrap { margin-bottom: var(--s-md); }
+
+  .marco-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-sm); }
+  .marco-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 12px 5px 5px; border-radius: var(--r-pill);
+    border: 1px solid var(--hairline); background: var(--surface-2);
+    color: inherit; font: inherit; font-size: 13px;
+    cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .marco-btn:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); }
+  .marco-btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
+  .marco-icon {
+    width: 28px; height: 28px; object-fit: contain; display: block; flex: none;
+    opacity: .4; filter: grayscale(1);
+    transition: opacity .15s ease, filter .15s ease;
+  }
+  .marco-name { white-space: nowrap; }
+  .marco-btn[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline));
+  }
+  .marco-btn[aria-pressed="true"] .marco-icon { opacity: 1; filter: none; }
+  .marco-btn[aria-pressed="true"] .marco-name { font-weight: 600; }
+
   /* ===== busca ===== */
   .mon-search-wrapper {
     display: flex; align-items: center; gap: 8px; margin-bottom: var(--s-lg);
@@ -205,8 +285,8 @@ const platforms = platformsForGame(genName, game);
     color: var(--muted);
   }
 
-  .mon-search-wrapper :global(.icon) {
-    font-size: 18px; flex: none;
+  .mon-search-wrapper :global(svg) {
+    flex: none;
   }
 
   .mon-search {

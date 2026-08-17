@@ -251,18 +251,19 @@ export async function updateTrainerId(oldTrainerId: string, newTrainerId: string
   // Criar novo save com ID atualizado
   const updatedSave: PokemonSave = { ...save, trainerId: newTrainerId };
 
-  // Atualizar pokémon capturados
-  const caught = await getChecksWithPrefix(`pokemon-caught::${oldTrainerId}::`);
-  await deleteKeysBulk('checks', Object.keys(caught));
-
-  // Renomear chaves de pokémon capturados
+  // Atualizar pokémon capturados e marcos (insígnias etc.) — mesmo padrão pros dois prefixos
   const d2 = await db();
-  const tx = d2.transaction('checks', 'readwrite');
-  for (const [key, val] of Object.entries(caught)) {
-    const newKey = key.replace(`pokemon-caught::${oldTrainerId}::`, `pokemon-caught::${newTrainerId}::`);
-    await tx.store.put(val, newKey);
+  for (const prefix of ['pokemon-caught::', 'pokemon-marco::']) {
+    const saved = await getChecksWithPrefix(`${prefix}${oldTrainerId}::`);
+    await deleteKeysBulk('checks', Object.keys(saved));
+
+    const tx = d2.transaction('checks', 'readwrite');
+    for (const [key, val] of Object.entries(saved)) {
+      const newKey = key.replace(`${prefix}${oldTrainerId}::`, `${prefix}${newTrainerId}::`);
+      await tx.store.put(val, newKey);
+    }
+    await tx.done;
   }
-  await tx.done;
 
   // Deletar save antigo e inserir novo
   await d.delete('pokemonSaves', oldTrainerId);
@@ -270,10 +271,11 @@ export async function updateTrainerId(oldTrainerId: string, newTrainerId: string
   await touch();
 }
 
-/** Apaga o save e, junto, todos os pokémon marcados dele (limpeza, não deixa órfão). */
+/** Apaga o save e, junto, todos os pokémon marcados e marcos dele (limpeza, não deixa órfão). */
 export async function deleteSave(trainerId: string): Promise<void> {
   const caught = await getChecksWithPrefix(`pokemon-caught::${trainerId}::`);
-  await deleteKeysBulk('checks', Object.keys(caught));
+  const marcos = await getChecksWithPrefix(`pokemon-marco::${trainerId}::`);
+  await deleteKeysBulk('checks', [...Object.keys(caught), ...Object.keys(marcos)]);
   await (await db()).delete('pokemonSaves', trainerId);
   await touch();
 }

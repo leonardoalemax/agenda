@@ -68,9 +68,6 @@ export function slugify(s: string): string {
 
 // Nomes que a slugificação não acerta sozinha.
 const GAME_NAMES: Record<string, string> = {
-	"red-japan": "Red (Japão)",
-	"green-japan": "Green (Japão)",
-	"blue-japan": "Blue (Japão)",
 	firered: "FireRed",
 	leafgreen: "LeafGreen",
 	heartgold: "HeartGold",
@@ -243,9 +240,6 @@ const ORIGIN_MARK_GAME_MAP: Record<string, string> = {
 	red: "Pokémon Red/Blue/Yellow (Virtual Console)",
 	blue: "Pokémon Red/Blue/Yellow (Virtual Console)",
 	yellow: "Pokémon Red/Blue/Yellow (Virtual Console)",
-	"red-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
-	"green-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
-	"blue-japan": "Pokémon Red/Blue/Yellow (Virtual Console)",
 	gold: "Pokémon Gold/Silver/Crystal (Virtual Console)",
 	silver: "Pokémon Gold/Silver/Crystal (Virtual Console)",
 	crystal: "Pokémon Gold/Silver/Crystal (Virtual Console)",

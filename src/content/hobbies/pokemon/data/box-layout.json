@@ -20,21 +20,6 @@
 			"perBox": 20,
 			"type": "icon-list"
 		},
-		"green-japan": {
-			"cols": 1,
-			"perBox": 20,
-			"type": "icon-list"
-		},
-		"red-japan": {
-			"cols": 1,
-			"perBox": 20,
-			"type": "icon-list"
-		},
-		"blue-japan": {
-			"cols": 1,
-			"perBox": 20,
-			"type": "icon-list"
-		},
 		"gold": {
 			"cols": 1,
 			"perBox": 20,

@@ -17,24 +17,6 @@
 		"bank": true,
 		"home": false
 	},
-	"red-japan": {
-		"origin_mark": "Game Boy Mark",
-		"transport": true,
-		"bank": true,
-		"home": false
-	},
-	"green-japan": {
-		"origin_mark": "Game Boy Mark",
-		"transport": true,
-		"bank": true,
-		"home": false
-	},
-	"blue-japan": {
-		"origin_mark": "Game Boy Mark",
-		"transport": true,
-		"bank": true,
-		"home": false
-	},
 	"gold": {
 		"transport": true,
 		"origin_mark": "Game Boy Mark",

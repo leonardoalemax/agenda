@@ -38,45 +38,6 @@
 					"media": ["digital"]
 				}
 			]
-		},
-		{
-			"game": "red-japan",
-			"platforms": [
-				{
-					"platform": "Game Boy",
-					"media": ["physical"]
-				},
-				{
-					"platform": "Virtual Console (3DS)",
-					"media": ["digital"]
-				}
-			]
-		},
-		{
-			"game": "green-japan",
-			"platforms": [
-				{
-					"platform": "Game Boy",
-					"media": ["physical"]
-				},
-				{
-					"platform": "Virtual Console (3DS)",
-					"media": ["digital"]
-				}
-			]
-		},
-		{
-			"game": "blue-japan",
-			"platforms": [
-				{
-					"platform": "Game Boy",
-					"media": ["physical"]
-				},
-				{
-					"platform": "Virtual Console (3DS)",
-					"media": ["digital"]
-				}
-			]
 		}
 	],
 	"generation-ii": [

@@ -22,24 +22,6 @@
         "pokedexes": [
           "kanto"
         ]
-      },
-      {
-        "slug": "red-japan",
-        "pokedexes": [
-          "kanto"
-        ]
-      },
-      {
-        "slug": "green-japan",
-        "pokedexes": [
-          "kanto"
-        ]
-      },
-      {
-        "slug": "blue-japan",
-        "pokedexes": [
-          "kanto"
-        ]
       }
     ]
   },

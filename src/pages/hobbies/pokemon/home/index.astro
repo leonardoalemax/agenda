@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { withBase } from '../../../../lib/base';
-import { allGenerations, generationLabel, gameName, dexForGame, coverPath, platformsForGame } from '../../../../lib/pokemon';
+import { allGenerations, generationLabel, gameName, dexForGame, coverPath, platformsForGame, originMarkPath } from '../../../../lib/pokemon';
 
 const gens = allGenerations();
 
 // Mesmo mapa game -> metadados usado em /saves/ — o client usa pra montar o
-// cabeçalho de cada save transferido (nome do jogo, capa) sem reimportar os
-// JSONs de dados no bundle desta página.
+// cabeçalho de cada save transferido (nome do jogo, capa, selo de origem)
+// sem reimportar os dados da collection no bundle desta página (pokemon.ts
+// usa astro:content, que não existe no navegador).
 const gameIndex = Object.fromEntries(
   gens.flatMap((gen) =>
     gen.games.map((g) => [
@@ -18,6 +19,7 @@ const gameIndex = Object.fromEntries(
         total: dexForGame(gen.name, g.slug).length,
         cover: coverPath(g.slug),
         platforms: platformsForGame(gen.name, g.slug),
+        originMark: originMarkPath(g.slug),
       },
     ]),
   ),

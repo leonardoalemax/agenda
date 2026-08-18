@@ -4,8 +4,10 @@
 // commitado — em runtime o site nunca fala com a API do RetroAchievements
 // (diretriz 2: offline sempre; diretriz 3: sem backend).
 //
-// Tudo é lido via `import.meta.glob` em vez de `import` direto porque antes do
-// primeiro sync os arquivos não existem, e um import quebraria o build.
+// Vêm das content collections `cheevosGames`/`cheevosSync`
+// (src/content/hobbies/cheevos/{games,sync.md}) via `astro:content` — por
+// isso este módulo só pode ser importado no servidor (.astro, build).
+import { getCollection } from "astro:content";
 
 export interface CheevosGame {
 	id: number;
@@ -50,46 +52,62 @@ export interface CheevosIndex {
 	games: CheevosGame[];
 }
 
-interface GameFile {
-	id: number;
-	title: string;
-	achievements: Achievement[];
-}
+const gameEntries = await getCollection("cheevosGames");
+const syncEntries = await getCollection("cheevosSync");
 
-const indexFiles = import.meta.glob<CheevosIndex>(
-	"../content/hobbies/cheevos/data/index.json",
-	{ eager: true, import: "default" },
-);
-const gameFiles = import.meta.glob<GameFile>(
-	"../content/hobbies/cheevos/data/games/*.json",
-	{ eager: true, import: "default" },
-);
+// Mais recente primeiro: é o que interessa olhar (mesma ordem de antes).
+const games: CheevosGame[] = gameEntries
+	.map(({ data }) => ({
+		id: data.id,
+		title: data.title,
+		console: data.console,
+		icon: data.icon,
+		total: data.total,
+		earned: data.earned,
+		earnedHardcore: data.earnedHardcore,
+		points: data.points,
+		earnedPoints: data.earnedPoints,
+		award: data.award,
+		awardedAt: data.awardedAt,
+		lastPlayedAt: data.lastPlayedAt,
+	}))
+	.sort((a, b) => (b.lastPlayedAt ?? "").localeCompare(a.lastPlayedAt ?? ""));
 
-const index: CheevosIndex | null = Object.values(indexFiles)[0] ?? null;
+const achievementsByGameId = new Map(gameEntries.map((e) => [e.data.id, e.data.achievements]));
 
-const byId = new Map<number, GameFile>(
-	Object.values(gameFiles).map((g) => [g.id, g]),
-);
+const sync = syncEntries[0]?.data ?? null;
 
 /** Retrato do último sync, ou null se o sync nunca rodou. */
 export function cheevosIndex(): CheevosIndex | null {
-	return index;
+	if (!sync) return null;
+	return {
+		user: sync.user,
+		syncedAt: sync.syncedAt,
+		totals: {
+			games: games.length,
+			achievements: games.reduce((s, g) => s + g.total, 0),
+			earned: games.reduce((s, g) => s + g.earned, 0),
+			points: games.reduce((s, g) => s + g.earnedPoints, 0),
+			mastered: games.filter((g) => g.award === "mastered").length,
+		},
+		games,
+	};
 }
 
 export function hasCheevos(): boolean {
-	return (index?.games.length ?? 0) > 0;
+	return games.length > 0;
 }
 
 export function allCheevosGames(): CheevosGame[] {
-	return index?.games ?? [];
+	return games;
 }
 
 export function cheevosGame(id: number): CheevosGame | undefined {
-	return index?.games.find((g) => g.id === id);
+	return games.find((g) => g.id === id);
 }
 
 export function achievementsFor(id: number): Achievement[] {
-	return byId.get(id)?.achievements ?? [];
+	return achievementsByGameId.get(id) ?? [];
 }
 
 /** Uma conquista conta como feita em qualquer modo (hardcore ou softcore). */

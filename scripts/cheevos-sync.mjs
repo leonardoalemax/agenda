@@ -4,7 +4,7 @@
 // Por que no build e não no navegador (diretriz 2 + 3 do CLAUDE.md):
 // o app é offline-first e não tem backend. A API do RetroAchievements exige
 // uma chave que não pode ir pro bundle nem pro repositório — então o sync roda
-// aqui, na máquina, e o resultado (JSON + imagens) é commitado. O site gerado
+// aqui, na máquina, e o resultado (.md + imagens) é commitado. O site gerado
 // não fala com a API em runtime.
 //
 // Credenciais: crie um `.env` na raiz (já ignorado pelo git) com
@@ -12,18 +12,19 @@
 //   RA_API_KEY=sua_chave      (retroachievements.org > Settings > Web API Key)
 //
 // Saída:
-//   src/content/hobbies/cheevos/data/index.json      — lista de jogos (leve)
-//   src/content/hobbies/cheevos/data/games/<id>.json — conquistas de cada jogo
-//   public/hobbies/cheevos/games/<id>.png            — ícone do jogo
+//   src/content/hobbies/cheevos/games/<id>.md — jogo + conquistas, tudo num arquivo
+//   src/content/hobbies/cheevos/sync.md       — metadado do sync (usuário, quando)
+//   public/hobbies/cheevos/games/<id>.png     — ícone do jogo
 //   public/hobbies/cheevos/badges/<badge>[_lock].png — badges das conquistas
 import { mkdir, writeFile, readdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { writeMd } from './lib/content-md.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const DATA_DIR = join(root, 'src', 'content', 'hobbies', 'cheevos', 'data');
-const GAMES_DATA_DIR = join(DATA_DIR, 'games');
+const GAMES_DIR = join(root, 'src', 'content', 'hobbies', 'cheevos', 'games');
+const SYNC_MD = join(root, 'src', 'content', 'hobbies', 'cheevos', 'sync.md');
 const ICON_DIR = join(root, 'public', 'hobbies', 'cheevos', 'games');
 const BADGE_DIR = join(root, 'public', 'hobbies', 'cheevos', 'badges');
 
@@ -119,7 +120,7 @@ if (!games.length) {
 
 // ===== 2. conquistas de cada jogo =====
 
-await mkdir(GAMES_DATA_DIR, { recursive: true });
+await mkdir(GAMES_DIR, { recursive: true });
 
 const index = [];
 const badges = new Set();
@@ -155,12 +156,7 @@ await pool(games, API_CONCURRENCY, async (g) => {
       .filter((a) => a.earnedAt || a.earnedHardcoreAt)
       .reduce((s, a) => s + a.points, 0);
 
-    await writeFile(
-      join(GAMES_DATA_DIR, `${g.GameID}.json`),
-      `${JSON.stringify({ id: g.GameID, title: g.Title, achievements }, null, '\t')}\n`,
-    );
-
-    index.push({
+    const summary = {
       id: g.GameID,
       title: g.Title,
       console: g.ConsoleName,
@@ -174,7 +170,15 @@ await pool(games, API_CONCURRENCY, async (g) => {
       award: g.HighestAwardKind ?? null,
       awardedAt: g.HighestAwardDate ?? null,
       lastPlayedAt: g.MostRecentAwardedDate ?? null,
-    });
+    };
+
+    await writeMd(
+      join(GAMES_DIR, `${g.GameID}.md`),
+      { type: 'cheevos-game', ...summary, achievements },
+      `<!-- Conquistas de "${g.Title}". Gerado por cheevos-sync.mjs. -->\n`,
+    );
+
+    index.push(summary);
   } catch (err) {
     failures.push(`${g.Title} (${g.GameID}): ${err.message}`);
   }
@@ -188,31 +192,17 @@ await pool(games, API_CONCURRENCY, async (g) => {
 // Mais recente primeiro: é o que interessa olhar.
 index.sort((a, b) => (b.lastPlayedAt ?? '').localeCompare(a.lastPlayedAt ?? ''));
 
-await writeFile(
-  join(DATA_DIR, 'index.json'),
-  `${JSON.stringify(
-    {
-      user: USER,
-      syncedAt: new Date().toISOString(),
-      totals: {
-        games: index.length,
-        achievements: index.reduce((s, g) => s + g.total, 0),
-        earned: index.reduce((s, g) => s + g.earned, 0),
-        points: index.reduce((s, g) => s + g.earnedPoints, 0),
-        mastered: index.filter((g) => g.award === 'mastered').length,
-      },
-      games: index,
-    },
-    null,
-    '\t',
-  )}\n`,
+await writeMd(
+  SYNC_MD,
+  { type: 'cheevos-sync', user: USER, syncedAt: new Date().toISOString() },
+  `<!-- Metadado do último sync — os totais são somados de cheevosGames na leitura, não guardados aqui. -->\n`,
 );
 
 // Jogos que sumiram do RA (ou saíram do escopo) não podem ficar de resto.
-const validFiles = new Set(index.map((g) => `${g.id}.json`));
-for (const f of await readdir(GAMES_DATA_DIR).catch(() => [])) {
-  if (f.endsWith('.json') && !validFiles.has(f)) {
-    await rm(join(GAMES_DATA_DIR, f));
+const validFiles = new Set(index.map((g) => `${g.id}.md`));
+for (const f of await readdir(GAMES_DIR).catch(() => [])) {
+  if (f.endsWith('.md') && !validFiles.has(f)) {
+    await rm(join(GAMES_DIR, f));
   }
 }
 

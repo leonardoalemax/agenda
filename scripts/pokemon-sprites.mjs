@@ -6,21 +6,19 @@
 import { mkdir, writeFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { readMd } from './lib/content-md.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public', 'hobbies', 'pokemon', 'sprites');
 const BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 const CONCURRENCY = 12;
 
-const { default: national } = await import(
-  join(root, 'src/content/hobbies/pokemon/data/pokedexes.json'),
-  { with: { type: 'json' } }
-).then((m) => ({ default: m.default.national }));
+const { frontmatter } = await readMd(join(root, 'src/content/hobbies/pokemon/pokemon.md'));
 
 await mkdir(outDir, { recursive: true });
 const existing = new Set(await readdir(outDir).catch(() => []));
 
-const ids = national.map((e) => e.entry_number);
+const ids = frontmatter.species.map((e) => e.number);
 const todo = ids.filter((id) => !existing.has(`${id}.png`));
 
 console.log(`${ids.length} sprites no total · ${todo.length} a baixar · ${ids.length - todo.length} já em disco`);

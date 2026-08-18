@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { withBase } from '../../../../lib/base';
-import { allGenerations, generationLabel, gameName, dexForGame, coverPath, platformsForGame } from '../../../../lib/pokemon';
+import { allGenerations, generationLabel, gameName, dexForGame, coverPath, platformsForGame, originMarkPath } from '../../../../lib/pokemon';
 
 const gens = allGenerations();
 
 // Mapa game -> metadados, pro client montar o form e calcular progresso sem
-// reimportar os JSONs de dados no bundle da página.
+// reimportar os dados da collection no bundle da página (pokemon.ts usa
+// astro:content, que não existe no navegador).
 const gameIndex = Object.fromEntries(
   gens.flatMap((gen) =>
     gen.games.map((g) => [
@@ -17,6 +18,7 @@ const gameIndex = Object.fromEntries(
         total: dexForGame(gen.name, g.slug).length,
         cover: coverPath(g.slug),
         platforms: platformsForGame(gen.name, g.slug),
+        originMark: originMarkPath(g.slug),
       },
     ]),
   ),

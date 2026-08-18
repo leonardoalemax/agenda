@@ -1,22 +1,25 @@
 // Relaciona cada jogo de Pokémon ao jogo correspondente no RetroAchievements.
 // Uso: npm run pokemon:ra-map
 //
-// Roda uma vez e o resultado é commitado — a relação é estável (jogo retrô não
-// muda de id). Mesma regra do cheevos:sync: chave no `.env`, nada em runtime.
+// Roda de novo sempre que quiser atualizar — a relação é estável (jogo retrô
+// não muda de id), mas rodar de novo não faz mal. Mesma regra do cheevos:sync:
+// chave no `.env`, nada em runtime.
 //
 // Por que script em vez de tabela escrita à mão: os ids do RetroAchievements
 // não são adivinháveis, e uma tabela chumbada envelhece calada. Aqui a lista de
-// consoles vem do próprio projeto (platforms-by-generation.json) e os ids vêm
-// da API — o que sobra pra curadoria é só o título esperado de cada jogo.
+// consoles vem de cada src/content/hobbies/pokemon/games/<slug>.md (campo
+// `platforms`) e os ids vêm da API — o que sobra pra curadoria é só o título
+// esperado de cada jogo.
 //
-// Saída: src/content/hobbies/pokemon/data/retroachievements.json
-import { readFile, writeFile } from 'node:fs/promises';
+// Saída: edita o campo `retroachievements` direto em cada
+// src/content/hobbies/pokemon/games/<slug>.md — não escreve JSON nenhum.
+import { readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { readMd, updateMdFrontmatter } from './lib/content-md.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DATA_DIR = join(root, 'src', 'content', 'hobbies', 'pokemon', 'data');
-const OUT = join(DATA_DIR, 'retroachievements.json');
+const GAMES_DIR = join(root, 'src', 'content', 'hobbies', 'pokemon', 'games');
 
 const API = 'https://retroachievements.org/API';
 
@@ -40,7 +43,7 @@ Preencha RA_API_KEY no .env (modelo em .env.example).
 
 // ===== títulos esperados por slug =====
 //
-// Só o título — o console sai de platforms-by-generation.json e o id da API.
+// Só o título — o console sai do campo `platforms` de cada game.md e o id da API.
 // Casamento é por título normalizado e exato, de propósito: o RetroAchievements
 // tem centenas de romhacks ("Pokemon Red Kaizo") e subsets ("… [Subset - Bonus]")
 // que um "contém" pegaria por engano.
@@ -113,20 +116,19 @@ async function api(endpoint, params) {
 
 // ===== 1. consoles do projeto =====
 
-const platformsByGen = JSON.parse(
-  await readFile(join(DATA_DIR, 'platforms-by-generation.json'), 'utf8'),
-);
+const gameFiles = (await readdir(GAMES_DIR)).filter((f) => f.endsWith('.md'));
+// slug -> caminho do .md, pra reaproveitar na hora de gravar o resultado.
+const gamePathBySlug = new Map(gameFiles.map((f) => [f.replace(/\.md$/, ''), join(GAMES_DIR, f)]));
 
 /** slug -> Set de nomes de console (como o projeto chama). */
 const consolesOf = new Map();
-for (const list of Object.values(platformsByGen)) {
-  for (const entry of list) {
-    const set = consolesOf.get(entry.game) ?? new Set();
-    for (const p of entry.platforms) {
-      if (!NOT_A_SYSTEM.has(p.platform)) set.add(p.platform);
-    }
-    consolesOf.set(entry.game, set);
+for (const [slug, path] of gamePathBySlug) {
+  const { frontmatter } = await readMd(path);
+  const set = new Set();
+  for (const p of frontmatter.platforms ?? []) {
+    if (!NOT_A_SYSTEM.has(p.platform)) set.add(p.platform);
   }
+  consolesOf.set(slug, set);
 }
 
 // ===== 2. sistemas do RetroAchievements =====
@@ -239,28 +241,35 @@ for (const [slug, consoles] of consolesOf) {
   }
 }
 
-// ===== 5. saída =====
+// ===== 5. saída: edita o campo `retroachievements` de cada jogo direto =====
+// Slug que ficou em `missing` (não bateu nada) não é tocado — mantém o que
+// já estava no arquivo em vez de arriscar um chute errado.
 
-await writeFile(
-  OUT,
-  `${JSON.stringify(
-    {
-      source: 'RetroAchievements API_GetGameList',
-      syncedAt: new Date().toISOString(),
-      // slug do jogo aqui -> jogo lá
-      matched,
-      // slug -> por que não existe equivalente (console fora do RA)
-      unsupported,
+let written = 0;
+for (const [slug, hit] of Object.entries(matched)) {
+  await updateMdFrontmatter(gamePathBySlug.get(slug), {
+    retroachievements: {
+      supported: true,
+      raId: hit.raId,
+      raTitle: hit.raTitle,
+      console: hit.console,
+      achievements: hit.achievements,
+      points: hit.points,
     },
-    null,
-    '\t',
-  )}\n`,
-);
+  });
+  written++;
+}
+for (const [slug, reason] of Object.entries(unsupported)) {
+  await updateMdFrontmatter(gamePathBySlug.get(slug), {
+    retroachievements: { supported: false, reason },
+  });
+  written++;
+}
 
 console.log(`
 ✓ ${Object.keys(matched).length} jogos relacionados
 · ${Object.keys(unsupported).length} sem equivalente (console fora do RetroAchievements)
-→ ${OUT.replace(root + '/', '')}`);
+→ ${written} arquivos atualizados em src/content/hobbies/pokemon/games/`);
 
 // Falhou algum que era pra bater? Mostra o que existe no console, pra corrigir
 // a lista TITLES sem ter que caçar na mão.

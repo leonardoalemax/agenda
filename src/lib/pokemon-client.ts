@@ -18,7 +18,7 @@ import {
   REMOTE_SYNC_EVENT,
   type PokemonSave,
 } from './store';
-import { ownedKey, caughtKey, marcoKey, spritePath, originMarkPath, type Media } from './pokemon';
+import { ownedKey, caughtKey, marcoKey, spritePath, type Media } from './pokemon-keys';
 import { withBase } from './base';
 import { ICONS } from './icons';
 
@@ -53,6 +53,10 @@ interface GameMeta {
   total: number;
   cover: string;
   platforms: string[];
+  /** Selo de origem (ver originMarkPath em lib/pokemon.ts) — pokemon.ts usa
+      astro:content e não pode ser importado aqui (código de cliente), então
+      isso vem pré-computado pela página no gameIndex. */
+  originMark: string | null;
 }
 
 let modalEl: HTMLDialogElement | null = null;
@@ -754,7 +758,7 @@ export function initPokemonSavesOverview() {
     const sorted = [...filtered].sort((a, b) => b.createdAt - a.createdAt);
     const rows = await Promise.all(
       sorted.map(async (s) => {
-        const meta = gameIndex[s.game] ?? { name: s.game, generation: '', total: 0, cover: '', platforms: [] };
+        const meta = gameIndex[s.game] ?? { name: s.game, generation: '', total: 0, cover: '', platforms: [], originMark: null };
         const caught = await getChecksWithPrefix(`${CAUGHT_PREFIX}${s.trainerId}::`);
         const n = Object.values(caught).filter(Boolean).length;
         const pct = meta.total ? Math.round((n / meta.total) * 100) : 0;
@@ -837,7 +841,7 @@ export function initPokemonHomePage() {
 
     const sections = await Promise.all(
       homeSaves.map(async (s) => {
-        const meta = gameIndex[s.game] ?? { name: s.game, generation: '', total: 0, cover: '', platforms: [] };
+        const meta = gameIndex[s.game] ?? { name: s.game, generation: '', total: 0, cover: '', platforms: [], originMark: null };
         const [dexData, caught] = await Promise.all([
           fetchDexData(s.game),
           getChecksWithPrefix(`${CAUGHT_PREFIX}${s.trainerId}::`),
@@ -862,8 +866,7 @@ export function initPokemonHomePage() {
                 ${box
                   .map((e) => {
                     const isCaught = Boolean(caught[caughtKey(s.trainerId, e.species)]);
-                    const markRelPath = originMarkPath(s.game);
-                    const markPath = markRelPath ? withBase(markRelPath) : null;
+                    const markPath = meta.originMark ? withBase(meta.originMark) : null;
                     return `
                     <li class="home-mon${isCaught ? ' caught' : ''}">
                       <div class="home-mon-sprite-wrapper">

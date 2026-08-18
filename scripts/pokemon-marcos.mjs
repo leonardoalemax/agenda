@@ -1,30 +1,32 @@
 // Baixa os ícones de marcos (insígnias etc.) para
-// public/hobbies/pokemon/badges/<arquivo>.png e reescreve marcos.json pra
-// apontar pro caminho local em vez da URL do GitHub.
+// public/hobbies/pokemon/badges/<arquivo>.png e edita cada
+// pokemon-game.md pra apontar pro caminho local em vez da URL remota.
 // Uso: npm run pokemon:marcos
 //
 // Precisam ser locais: o PWA tem que funcionar offline (diretriz 2 do CLAUDE.md).
 // São ~51 arquivos (badges + poke-ball), poucos KB no total.
-import { mkdir, writeFile, readdir, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { readMd, updateMdFrontmatter } from './lib/content-md.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public', 'hobbies', 'pokemon', 'badges');
-const marcosPath = join(root, 'src/content/hobbies/pokemon/data/marcos.json');
+const gamesDir = join(root, 'src/content/hobbies/pokemon/games');
 const LOCAL_PREFIX = 'hobbies/pokemon/badges/';
 
 function basenameFromUrl(url) {
   return decodeURIComponent(url.split('/').pop());
 }
 
-const marcos = JSON.parse(await readFile(marcosPath, 'utf-8'));
+const gameFiles = (await readdir(gamesDir)).filter((f) => f.endsWith('.md'));
+const gamePaths = gameFiles.map((f) => join(gamesDir, f));
+const games = await Promise.all(gamePaths.map((p) => readMd(p).then(({ frontmatter }) => frontmatter)));
 
 const urls = new Set();
-for (const entry of Object.values(marcos)) {
-  for (const insignia of entry.insignias) {
-    if (!insignia.url.startsWith('http')) continue; // já local, de uma execução anterior
-    urls.add(insignia.url);
+for (const game of games) {
+  for (const marco of game.marcos) {
+    if (marco.icon.startsWith('http')) urls.add(marco.icon);
   }
 }
 
@@ -62,19 +64,23 @@ if (fail.length) {
   process.exitCode = 1;
 }
 
-// Reescreve marcos.json com o caminho local — só troca se o arquivo existe
-// em disco (não aponta pra um download que falhou).
+// Edita cada jogo com o caminho local — só troca se o arquivo existe em
+// disco (não aponta pra um download que falhou).
 const downloaded = new Set(await readdir(outDir).catch(() => []));
 let rewritten = 0;
-for (const entry of Object.values(marcos)) {
-  for (const insignia of entry.insignias) {
-    if (!insignia.url.startsWith('http')) continue;
-    const file = basenameFromUrl(insignia.url);
-    if (!downloaded.has(file)) continue;
-    insignia.url = `${LOCAL_PREFIX}${file}`;
-    rewritten++;
-  }
+for (const path of gamePaths) {
+  await updateMdFrontmatter(path, (fm) => {
+    let changed = false;
+    for (const marco of fm.marcos) {
+      if (!marco.icon.startsWith('http')) continue;
+      const file = basenameFromUrl(marco.icon);
+      if (!downloaded.has(file)) continue;
+      marco.icon = `${LOCAL_PREFIX}${file}`;
+      changed = true;
+      rewritten++;
+    }
+    return changed ? fm : undefined;
+  });
 }
 
-await writeFile(marcosPath, `${JSON.stringify(marcos, null, '\t')}\n`);
-console.log(`✓ marcos.json atualizado (${rewritten} referências trocadas pro caminho local)`);
+console.log(`✓ ${rewritten} referências trocadas pro caminho local em src/content/hobbies/pokemon/games/`);

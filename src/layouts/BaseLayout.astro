@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { withBase } from '../lib/base';
 import { pwaInfo } from 'virtual:pwa-info';
+import AccountMenu from '../components/AccountMenu.astro';
 
 interface Props {
   title?: string;
@@ -51,18 +52,13 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
               stroke-linejoin="round" />
           </svg>
         </button>
+        <AccountMenu />
       </div>
     </header>
 
     <main class="wrap">
       <slot />
     </main>
-
-    <footer class="foot">
-      <div class="wrap">
-        Feito com Markdown · funciona offline · seus dados ficam no dispositivo
-      </div>
-    </footer>
 
     <script>
       import { registerSW } from 'virtual:pwa-register';
@@ -122,7 +118,8 @@ const { title = 'Minha Agenda', description = 'Agenda pessoal em Markdown, offli
         location.replace(u.toString());
       });
 
-      // Inicializa o sync por gist (inerte se não houver token neste aparelho)
+      // Liga login (Google) + sync (Firestore) — nunca quebra o app se falhar,
+      // o IndexedDB local segue funcionando offline de qualquer jeito.
       initSync();
     </script>
   </body>

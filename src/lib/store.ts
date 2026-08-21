@@ -1,10 +1,10 @@
 // Persistência local no cliente (IndexedDB via idb).
 // Guarda: estado dos checks, anotações, valores numéricos (ex.: preço pago),
-// saves de Pokémon e metadados de sync (token do GitHub, id do gist, relógio
-// da última edição).
+// saves de Pokémon e metadados de sync (carimbo da última edição local).
 //
 // O IndexedDB é a fonte de verdade da tela — o app funciona offline sempre.
-// O sync (src/lib/gist-sync.ts) só empurra/puxa o snapshot inteiro por cima.
+// O sync (src/lib/firestore-sync.ts) só empurra/puxa o snapshot inteiro por
+// cima, pro Firestore.
 import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'minha-agenda';

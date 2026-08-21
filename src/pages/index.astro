@@ -1,8 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Backup from '../components/Backup.astro';
-import SyncPanel from '../components/SyncPanel.astro';
 import { withBase } from '../lib/base';
 import { cheevosIndex } from '../lib/cheevos';
 
@@ -25,10 +23,16 @@ const labels: Record<string, string> = {
   checklist: 'Checklists',
   custom: 'Custom',
 };
+// Desligado por enquanto (pedido do usuário) — o conteúdo continua todo lá
+// em src/content/, só a listagem na home é que some. Reative trocando pra
+// true quando precisar de novo.
+const SHOW_AGENDA_SECTIONS = false;
 const order = ['diario', 'checklist', 'custom'];
-const groups = order
-  .map((type) => ({ type, items: sorted.filter((e) => e.data.type === type) }))
-  .filter((g) => g.items.length > 0);
+const groups = SHOW_AGENDA_SECTIONS
+  ? order
+      .map((type) => ({ type, items: sorted.filter((e) => e.data.type === type) }))
+      .filter((g) => g.items.length > 0)
+  : [];
 
 const fmt = (d?: Date) =>
   d ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: 'UTC' }).format(d) : '';
@@ -36,12 +40,11 @@ const fmt = (d?: Date) =>
 
 <BaseLayout>
   <h1 class="hero-title">Sua agenda</h1>
-  <p class="lead">
-    {entries.length} {entries.length === 1 ? 'página' : 'páginas'} · escreva Markdown em <code>src/content/</code> e dê push.
-  </p>
-
-  <SyncPanel />
-  <Backup />
+  {SHOW_AGENDA_SECTIONS && (
+    <p class="lead">
+      {entries.length} {entries.length === 1 ? 'página' : 'páginas'} · escreva Markdown em <code>src/content/</code> e dê push.
+    </p>
+  )}
 
   <h2 class="section-title">Áreas</h2>
   <div class="areas">

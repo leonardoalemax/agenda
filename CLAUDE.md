@@ -17,21 +17,29 @@
    funcionar offline (inclusive imagens) tem que entrar no `globPatterns` do
    Workbox em `astro.config.mjs`.
 
-3. **Dados em IndexedDB local; sync opcional por Gist.** Todo estado que o
-   usuário altera (checks, preços pagos, notas) é salvo **localmente em
-   IndexedDB** via `src/lib/store.ts` — **offline funciona 100%, sempre**.
-   Havendo token configurado, `src/lib/gist-sync.ts` espelha o snapshot inteiro
-   num **gist privado do GitHub**, com regra **"o mais novo vence"** (sem merge
-   por chave). **Sem backend próprio.** O token é colado pelo usuário no app e
-   fica no aparelho — **nunca no build, nunca no repositório**. Não introduzir
-   servidor/DB remoto sem antes mudar esta diretriz.
+3. **Dados em IndexedDB local; sync por Firebase (Firestore + Auth).** Todo
+   estado que o usuário altera (checks, preços pagos, notas, saves de Pokémon)
+   é salvo **localmente em IndexedDB** via `src/lib/store.ts` —
+   **offline funciona 100%, sempre**, com ou sem rede, com ou sem login.
+   `src/lib/firestore-sync.ts` espelha o snapshot inteiro num documento do
+   **Firestore** (`sync/snapshot`), regra **"o mais novo vence"** (sem merge
+   por chave). **Leitura é pública** (qualquer visitante, logado ou não, recebe
+   o snapshot em tempo real); **escrita só pelo e-mail admin**
+   (`PUBLIC_ADMIN_EMAIL`, logado via Google/Firebase Auth) — a segurança de
+   verdade é o `firestore.rules`, o client só reflete isso na UI (ver
+   `src/lib/auth-client.ts` e `src/lib/admin-gate.ts`). **Sem backend
+   próprio escrito por nós** — o Firebase é o único serviço externo com
+   estado; as chaves `PUBLIC_FIREBASE_*` não são segredo (o SDK client-side
+   precisa delas em runtime), mas nunca commitar credenciais de serviço/admin
+   do Firebase. Não introduzir servidor/DB remoto além do Firebase sem antes
+   mudar esta diretriz.
 
 ## Onde estão os detalhes
 
 - [`docs/diretrizes/arquitetura.md`](docs/diretrizes/arquitetura.md) — stack, build, deploy, PWA.
-- [`docs/diretrizes/dados-e-sync.md`](docs/diretrizes/dados-e-sync.md) — IndexedDB, sync por gist.
+- [`docs/diretrizes/dados-e-sync.md`](docs/diretrizes/dados-e-sync.md) — IndexedDB, sync por Firebase, login e permissões.
 - [`docs/diretrizes/conteudo.md`](docs/diretrizes/conteudo.md) — como escrever md, tipos, coleções.
-- [`docs/SYNC.md`](docs/SYNC.md) — como ligar o sync entre iPad e iPhone.
+- [`docs/SYNC.md`](docs/SYNC.md) — como configurar o Firebase e o login admin.
 
 ## Antes de mudar algo estrutural
 

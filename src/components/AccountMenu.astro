@@ -1,0 +1,146 @@
+---
+// Login (Google) + status de sync, no header — global, em toda página.
+// Bolinha de avatar: ícone genérico deslogado, foto da conta Google logada.
+// Clique abre um submenu com status do sync e entrar/sair.
+import { CircleUserRound } from '@lucide/astro';
+---
+<div class="account-menu" id="account-menu">
+  <button
+    type="button"
+    class="icon-btn avatar-btn"
+    id="account-toggle"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-label="Conta e sincronização">
+    <span class="avatar" id="account-avatar"><CircleUserRound size={18} /></span>
+  </button>
+
+  <div class="account-dropdown" id="account-dropdown" hidden>
+    <div class="account-sync">
+      <span class="dot" id="account-sync-dot"></span>
+      <span class="hint" id="account-sync-msg">carregando…</span>
+    </div>
+    <p class="hint account-email" id="account-email" hidden></p>
+    <button type="button" class="btn" id="account-signin">Entrar com Google</button>
+    <button type="button" class="btn danger" id="account-signout" hidden>Sair</button>
+  </div>
+</div>
+
+<script>
+  import { signInWithGoogle, signOutUser, currentAdminStatus, ADMIN_STATUS_EVENT } from '../lib/auth-client';
+  import type { AdminStatus } from '../lib/auth-client';
+  import { currentSyncStatus, SYNC_STATUS_EVENT } from '../lib/firestore-sync';
+  import type { SyncStatus } from '../lib/firestore-sync';
+
+  const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+
+  const menu = $('#account-menu');
+  const toggle = $<HTMLButtonElement>('#account-toggle');
+  const dropdown = $('#account-dropdown');
+  const avatar = $('#account-avatar');
+  const dot = $('#account-sync-dot');
+  const msg = $('#account-sync-msg');
+  const emailEl = $('#account-email');
+  const btnIn = $<HTMLButtonElement>('#account-signin');
+  const btnOut = $<HTMLButtonElement>('#account-signout');
+
+  const DEFAULT_AVATAR = avatar.innerHTML;
+
+  function setAvatarPhoto(photoURL: string | null) {
+    if (!photoURL) {
+      avatar.innerHTML = DEFAULT_AVATAR;
+      return;
+    }
+    avatar.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = photoURL;
+    img.alt = '';
+    img.referrerPolicy = 'no-referrer';
+    avatar.appendChild(img);
+  }
+
+  function closeMenu() {
+    dropdown.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  toggle.addEventListener('click', () => {
+    const opening = dropdown.hidden;
+    dropdown.hidden = !opening;
+    toggle.setAttribute('aria-expanded', String(opening));
+  });
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target as Node)) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  function renderSync(s: SyncStatus) {
+    dot.className = `dot ${s.state}`;
+    msg.textContent = s.message;
+  }
+
+  function renderAuth(s: AdminStatus) {
+    if (!s.ready) return;
+    btnIn.hidden = s.signedIn;
+    btnOut.hidden = !s.signedIn;
+    emailEl.hidden = !s.signedIn;
+    if (s.signedIn) {
+      emailEl.textContent = s.isAdmin ? `admin: ${s.email}` : `${s.email} (sem permissão de escrita)`;
+    }
+    setAvatarPhoto(s.signedIn ? s.photoURL : null);
+    menu.classList.toggle('is-admin', s.isAdmin);
+  }
+
+  window.addEventListener(SYNC_STATUS_EVENT, (e) => renderSync((e as CustomEvent<SyncStatus>).detail));
+  window.addEventListener(ADMIN_STATUS_EVENT, (e) => renderAuth((e as CustomEvent<AdminStatus>).detail));
+  renderSync(currentSyncStatus());
+  renderAuth(currentAdminStatus());
+
+  btnIn.addEventListener('click', async () => {
+    btnIn.disabled = true;
+    const err = await signInWithGoogle();
+    btnIn.disabled = false;
+    if (err) {
+      dot.className = 'dot error';
+      msg.textContent = `✗ ${err}`;
+    }
+  });
+
+  btnOut.addEventListener('click', () => {
+    signOutUser();
+    closeMenu();
+  });
+</script>
+
+<style>
+  .account-menu { position: relative; }
+  .avatar-btn { padding: 0; overflow: hidden; }
+  .avatar {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; color: var(--muted);
+  }
+  .avatar :global(img) { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .account-menu.is-admin .avatar-btn { border-color: color-mix(in srgb, var(--accent) 55%, var(--hairline)); }
+
+  .account-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    min-width: 240px; z-index: 30;
+    display: flex; flex-direction: column; gap: var(--s-sm);
+    padding: var(--s-md);
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--r-lg); box-shadow: var(--product-shadow);
+  }
+  .account-sync { display: flex; align-items: center; gap: 8px; }
+  .account-email { word-break: break-all; margin: 0; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%; flex: none;
+    background: var(--muted);
+  }
+  .dot.ok { background: #34c759; }
+  .dot.syncing { background: #ff9f0a; }
+  .dot.error { background: #ff3b30; }
+  .btn.danger { color: #ff3b30; }
+  #account-signin, #account-signout { width: 100%; }
+</style>

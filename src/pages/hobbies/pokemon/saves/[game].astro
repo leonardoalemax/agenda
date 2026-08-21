@@ -62,10 +62,10 @@ const marcos = marcosForGame(game);
         <div class="marcos-header">
           <h2 class="marcos-title">Marcos</h2>
           <div class="marcos-actions">
-            <button class="icon-btn" type="button" data-marco-check-all title="Marcar todos" aria-label="Marcar todos os marcos">
+            <button class="icon-btn" type="button" data-marco-check-all data-admin-only disabled title="Marcar todos" aria-label="Marcar todos os marcos">
               <Check size={18} />
             </button>
-            <button class="icon-btn" type="button" data-marco-uncheck-all title="Desmarcar todos" aria-label="Desmarcar todos os marcos">
+            <button class="icon-btn" type="button" data-marco-uncheck-all data-admin-only disabled title="Desmarcar todos" aria-label="Desmarcar todos os marcos">
               <X size={18} />
             </button>
           </div>
@@ -86,7 +86,7 @@ const marcos = marcosForGame(game);
         <ul class="marco-list">
           {marcos.map((m) => (
             <li class="marco" data-marco>
-              <button type="button" class="marco-btn" data-marco-toggle={marcoId(m.nome)} aria-pressed="false">
+              <button type="button" class="marco-btn" data-marco-toggle={marcoId(m.nome)} data-admin-only disabled aria-pressed="false">
                 <img class="marco-icon" src={withBase(m.url)} alt="" width="40" height="40" loading="lazy" decoding="async" />
                 <span class="marco-name">{m.nome}</span>
               </button>
@@ -98,21 +98,21 @@ const marcos = marcosForGame(game);
 
     <div class="active-save-info">
       <div class="active-save-status">
-        <button class="icon-btn moved-home-btn" type="button" data-moved-home title="Movido pro HOME" aria-label="Movido pro HOME">
+        <button class="icon-btn moved-home-btn" type="button" data-moved-home data-admin-only disabled title="Movido pro HOME" aria-label="Movido pro HOME">
           <House size={20} />
         </button>
       </div>
       <div class="active-save-actions">
-        <button class="icon-btn" type="button" data-rename-active title="Renomear" aria-label="Renomear">
+        <button class="icon-btn" type="button" data-rename-active data-admin-only disabled title="Renomear" aria-label="Renomear">
           <Pencil size={18} />
         </button>
-        <button class="icon-btn" type="button" data-delete-active title="Apagar" aria-label="Apagar">
+        <button class="icon-btn" type="button" data-delete-active data-admin-only disabled title="Apagar" aria-label="Apagar">
           <Trash2 size={18} />
         </button>
-        <button class="icon-btn" type="button" data-check-all title="Marcar todos" aria-label="Marcar todos">
+        <button class="icon-btn" type="button" data-check-all data-admin-only disabled title="Marcar todos" aria-label="Marcar todos">
           <Check size={18} />
         </button>
-        <button class="icon-btn" type="button" data-uncheck-all title="Desmarcar todos" aria-label="Desmarcar todos">
+        <button class="icon-btn" type="button" data-uncheck-all data-admin-only disabled title="Desmarcar todos" aria-label="Desmarcar todos">
           <X size={18} />
         </button>
       </div>
@@ -159,7 +159,7 @@ const marcos = marcosForGame(game);
               const markPath = originMarkPath(game);
               return (
                 <li class="mon" data-mon>
-                  <button type="button" class="mon-btn" data-caught={e.species} aria-pressed="false" aria-label={e.name}>
+                  <button type="button" class="mon-btn" data-caught={e.species} data-admin-only disabled aria-pressed="false" aria-label={e.name}>
                     <div class="mon-sprite-wrapper">
                       <img
                         class="mon-sprite"

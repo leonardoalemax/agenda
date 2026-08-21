@@ -1,0 +1,30 @@
+// Regras do Firestore — Minha Agenda
+//
+// Modelo: leitura pública (site é público, sem cadastro), escrita só pro
+// admin (eu). Não tem como a rule ler o .env do app — o e-mail do admin
+// fica fixo aqui mesmo. Não é segredo: só logar de fato com essa conta
+// Google (que só eu tenho a senha) dá permissão de escrita.
+//
+// Ajuste ADMIN_EMAIL se um dia trocar de conta. Se um dia tiver mais de um
+// admin, troca a comparação por `in ['a@x.com', 'b@x.com']`.
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'leualemax@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    // Cobre todo o banco por enquanto — ainda não desenhamos as collections
+    // específicas. Quando desenhar (ex.: /agenda/{doc}, /pokemon/{doc}),
+    // dá pra trocar por regras por collection se precisar de nuance
+    // (ex.: alguma collection só o admin lê também).
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

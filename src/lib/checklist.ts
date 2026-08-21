@@ -1,6 +1,7 @@
 // Hidrata as checkboxes de uma checklist com o estado salvo localmente
 // e persiste as mudanças. Também atualiza a barra de progresso.
 import { getCheck, setCheck } from './store';
+import { applyAdminGate } from './admin-gate';
 
 // hash estável a partir do texto do item (para a chave não depender da ordem)
 function hash(str: string): string {
@@ -45,7 +46,9 @@ export function initChecklists() {
   }
 
   boxes.forEach((box) => {
-    box.disabled = false; // GFM renderiza como disabled por padrão
+    // GFM renderiza como disabled por padrão; a gate decide se liga de
+    // verdade (só admin) — ver src/lib/admin-gate.ts.
+    box.setAttribute('data-admin-only', '');
     box.addEventListener('change', () => {
       box.closest('li')?.classList.toggle('done', box.checked);
       setCheck(keyOf(box), box.checked);
@@ -53,6 +56,7 @@ export function initChecklists() {
     });
   });
 
+  applyAdminGate(root);
   hydrate();
   window.addEventListener('agenda:remote-sync', hydrate);
 }

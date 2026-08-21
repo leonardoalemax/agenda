@@ -228,6 +228,17 @@ a:hover { text-decoration: underline; }
 .btn:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
 .row { display: flex; gap: var(--s-sm); flex-wrap: wrap; align-items: center; }
 
+/* ===== Controles só-admin =====
+   Todo controle que edita dado compartilhado nasce `disabled` no HTML
+   (visitante nunca vê nem por um instante um botão "ativo" que na verdade
+   não faz nada) — src/lib/admin-gate.ts tira o disabled só depois de
+   confirmar login como admin. Estilo aqui pra não repetir isso em cada
+   componente. */
+[data-admin-only]:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 /* ===== Cartões utilitários (home) ===== */
 .grid { display: grid; gap: var(--s-md); }
 .card {
@@ -303,10 +314,6 @@ ul.contains-task-list li.done > * { text-decoration: line-through; }
 .subnav-item:hover { text-decoration: none; border-color: var(--accent); }
 .subnav-item.active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
 .subnav-item:focus-visible { outline: 2px solid var(--accent-focus); outline-offset: 2px; }
-
-/* ===== Footer ===== */
-footer.foot { color: var(--muted); font-size: 12px; margin-top: var(--s-xxl); border-top: 1px solid var(--hairline); }
-footer.foot .wrap { text-align: center; padding-top: var(--s-xl); padding-bottom: max(var(--s-xl), env(safe-area-inset-bottom)); }
 
 /* ============================================================
    Hobbies: Gunpla

@@ -70,13 +70,13 @@ const totalYen = wishlist.reduce((s, k) => s + k.data.priceYen, 0);
             <span class="brl">{formatBRL(yenToBRL(k.data.priceYen))}</span>
           </div>
           <label class="bought-toggle">
-            <input type="checkbox" data-bought={k.id} />
+            <input type="checkbox" data-bought={k.id} data-admin-only disabled />
             <span>Comprado</span>
           </label>
           <div class="paid-row">
             <label class="paid-input">
               Paguei R$
-              <input type="number" inputmode="decimal" step="0.01" min="0" data-paid={k.id} placeholder="0,00" />
+              <input type="number" inputmode="decimal" step="0.01" min="0" data-paid={k.id} placeholder="0,00" data-admin-only disabled />
             </label>
             <span class="paid-diff" data-paid-diff={k.id}></span>
           </div>

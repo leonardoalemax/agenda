@@ -18,6 +18,7 @@
   "dependencies": {
     "@lucide/astro": "^1.31.0",
     "astro": "^5.2.0",
+    "firebase": "^12.18.0",
     "idb": "^8.0.0",
     "lucide": "^1.31.0"
   },

@@ -104,7 +104,7 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
               {(['physical', 'digital'] as const).map((m) =>
                 game.media.includes(m) ? (
                   <label class="media-toggle" data-media={m} title={mediaLabel(m)}>
-                    <input type="checkbox" class="sr-only" data-owned={`${game.slug}::${m}`} />
+                    <input type="checkbox" class="sr-only" data-owned={`${game.slug}::${m}`} data-admin-only disabled />
                     {m === 'physical' ? <Disc size={18} /> : <Cloud size={18} />}
                   </label>
                 ) : (
@@ -220,7 +220,7 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
   .game:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); }
   .game[hidden] { display: none; }
   .game-cover {
-    width: 48px; height: 48px; object-fit: contain; background: var(--surface-2);
+    width: 128px; height: 128px; object-fit: contain; background: var(--surface-2);
     border-radius: var(--r-sm); display: block; flex: none;
     filter: drop-shadow(var(--product-shadow));
   }
@@ -277,10 +277,10 @@ const withCheevos = sections.reduce((s, x) => s + x.games.filter((g) => g.cheevo
 
   @media (max-width: 600px) {
     .game {
-      display: grid; grid-template-columns: 48px 1fr auto;
+      display: grid; grid-template-columns: 64px 1fr auto;
       grid-template-rows: auto auto auto; align-items: center;
     }
-    .game-cover { grid-column: 1; grid-row: 1 / 4; }
+    .game-cover {width: 48px; height: 48px; grid-column: 1; grid-row: 1 / 4; }
     .game-name { grid-column: 2; grid-row: 1; flex: unset; }
     .media-row { grid-column: 2; grid-row: 2; }
     .game-progress {

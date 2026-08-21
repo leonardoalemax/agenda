@@ -724,7 +724,14 @@ export function initPokemonSavesOverview() {
   if (gameFilter) gameFilter.value = filterFromUrl;
 
   newBtn?.addEventListener('click', () => {
+    // Filtrado por um jogo específico (ex.: veio de "ver saves" na tela de
+    // Jogos) → pula a etapa de escolher o jogo, já abre o formulário dele.
+    const selectedGame = gameFilter?.value || '';
+    const meta = selectedGame ? gameIndex[selectedGame] : undefined;
     openNewSaveModal({
+      game: selectedGame || undefined,
+      gameLabel: meta?.name,
+      platforms: meta?.platforms,
       gameIndex,
       onCreated: (save) => {
         location.href = withBase(`hobbies/pokemon/saves/${save.game}/?save=${save.trainerId}`);
